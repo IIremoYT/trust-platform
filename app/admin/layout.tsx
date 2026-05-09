@@ -24,6 +24,8 @@ import {
   LogOut,
   Bell,
   Users,
+  Menu,
+  X,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -42,6 +44,9 @@ export default function AdminLayout({
   const [checkingAuth, setCheckingAuth] =
     useState(true);
 
+  const [mobileMenuOpen, setMobileMenuOpen] =
+    useState(false);
+
   /* =========================
      AUTH CHECK
   ========================= */
@@ -51,7 +56,6 @@ export default function AdminLayout({
       onAuthStateChanged(
         auth,
         (user) => {
-          // لو مش مسجل دخول
           if (
             !user &&
             pathname !== "/admin"
@@ -137,13 +141,10 @@ export default function AdminLayout({
         <div
           className="
             w-14 h-14
-
             border-4
             border-yellow-500/20
             border-t-yellow-500
-
             rounded-full
-
             animate-spin
           "
         ></div>
@@ -189,6 +190,7 @@ export default function AdminLayout({
       className="
         flex
         h-screen
+        relative
 
         bg-[#050505]
 
@@ -198,11 +200,33 @@ export default function AdminLayout({
       "
     >
       {/* =========================
+          MOBILE OVERLAY
+      ========================= */}
+
+      {mobileMenuOpen && (
+        <div
+          onClick={() =>
+            setMobileMenuOpen(false)
+          }
+          className="
+            fixed inset-0
+            bg-black/70
+            z-40
+            md:hidden
+          "
+        />
+      )}
+
+      {/* =========================
           SIDEBAR
       ========================= */}
 
       <aside
-        className="
+        className={`
+          fixed md:relative
+          top-0 right-0
+
+          h-full
           w-72
 
           bg-[#0A0A0A]
@@ -216,63 +240,89 @@ export default function AdminLayout({
           overflow-y-auto
 
           custom-scrollbar
-        "
+
+          z-50
+
+          transition-transform duration-300
+
+          ${
+            mobileMenuOpen
+              ? "translate-x-0"
+              : "translate-x-full md:translate-x-0"
+          }
+        `}
       >
-        {/* Logo */}
+        {/* TOP */}
         <div
           className="
-            flex items-center gap-3
-
-            mb-12
-
-            px-2
+            flex items-center justify-between
+            mb-10
           "
         >
+          {/* LOGO */}
           <div
             className="
-              w-11 h-11
-
-              bg-brand-yellow
-
-              rounded-2xl
-
-              flex items-center justify-center
-
-              text-black
-              font-black
-              text-lg
-
-              shadow-[0_0_25px_rgba(212,175,55,0.25)]
+              flex items-center gap-3
             "
           >
-            T
-          </div>
-
-          <div>
-            <h1
+            <div
               className="
-                text-white
+                w-11 h-11
+
+                bg-brand-yellow
+
+                rounded-2xl
+
+                flex items-center justify-center
+
+                text-black
                 font-black
-                text-xl
-                tracking-tight
-              "
-            >
-              TRUST
-            </h1>
+                text-lg
 
-            <p
-              className="
-                text-[10px]
-                text-gray-500
-                tracking-[0.2em]
+                shadow-[0_0_25px_rgba(212,175,55,0.25)]
               "
             >
-              ADMIN PANEL
-            </p>
+              T
+            </div>
+
+            <div>
+              <h1
+                className="
+                  text-white
+                  font-black
+                  text-xl
+                "
+              >
+                TRUST
+              </h1>
+
+              <p
+                className="
+                  text-[10px]
+                  text-gray-500
+                  tracking-[0.2em]
+                "
+              >
+                ADMIN PANEL
+              </p>
+            </div>
           </div>
+
+          {/* CLOSE BUTTON */}
+          <button
+            onClick={() =>
+              setMobileMenuOpen(false)
+            }
+            className="
+              md:hidden
+              text-gray-400
+            "
+          >
+            <X size={24} />
+          </button>
         </div>
 
-        {/* Menu */}
+        {/* MENU */}
         <nav className="flex-1 space-y-2">
           {menuItems.map((item) => {
             const active =
@@ -282,6 +332,9 @@ export default function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() =>
+                  setMobileMenuOpen(false)
+                }
                 className={`
                   flex
                   items-center
@@ -316,8 +369,6 @@ export default function AdminLayout({
               >
                 <span
                   className={`
-                    transition-all
-
                     ${
                       active
                         ? "text-brand-yellow"
@@ -339,7 +390,7 @@ export default function AdminLayout({
           })}
         </nav>
 
-        {/* Logout */}
+        {/* LOGOUT */}
         <button
           onClick={handleLogout}
           className="
@@ -354,9 +405,6 @@ export default function AdminLayout({
             text-red-500
 
             hover:bg-red-500/10
-
-            border border-transparent
-            hover:border-red-500/20
 
             transition-all duration-300
           "
@@ -398,41 +446,73 @@ export default function AdminLayout({
 
             flex items-center justify-between
 
-            px-8
+            px-4 md:px-8
 
             shrink-0
           "
         >
-          {/* Title */}
-          <div>
-            <h2
-              className="
-                text-white
-                text-xl
-                font-black
-              "
-            >
-              {currentPage}
-            </h2>
-
-            <p
-              className="
-                text-xs
-                text-gray-500
-                mt-1
-              "
-            >
-              إدارة محتوى الموقع
-            </p>
-          </div>
-
-          {/* Right */}
+          {/* TITLE + MOBILE MENU */}
           <div
             className="
-              flex items-center gap-6
+              flex items-center gap-4
             "
           >
-            {/* Notifications */}
+            {/* MOBILE MENU BUTTON */}
+            <button
+              onClick={() =>
+                setMobileMenuOpen(true)
+              }
+              className="
+                md:hidden
+
+                w-11 h-11
+
+                rounded-2xl
+
+                bg-white/5
+
+                border border-white/10
+
+                flex items-center justify-center
+
+                text-white
+              "
+            >
+              <Menu size={22} />
+            </button>
+
+            {/* TITLE */}
+            <div>
+              <h2
+                className="
+                  text-white
+                  text-lg md:text-xl
+                  font-black
+                "
+              >
+                {currentPage}
+              </h2>
+
+              <p
+                className="
+                  text-xs
+                  text-gray-500
+                  mt-1
+                  hidden md:block
+                "
+              >
+                إدارة محتوى الموقع
+              </p>
+            </div>
+          </div>
+
+          {/* RIGHT */}
+          <div
+            className="
+              flex items-center gap-4 md:gap-6
+            "
+          >
+            {/* NOTIFICATIONS */}
             <button
               className="
                 relative
@@ -468,17 +548,17 @@ export default function AdminLayout({
               </span>
             </button>
 
-            {/* Admin */}
+            {/* ADMIN */}
             <div
               className="
                 flex items-center gap-3
 
-                pr-6
+                pr-4 md:pr-6
 
                 border-r border-white/10
               "
             >
-              <div className="text-left">
+              <div className="hidden sm:block text-left">
                 <p
                   className="
                     text-white
@@ -538,7 +618,7 @@ export default function AdminLayout({
 
             custom-scrollbar
 
-            p-8
+            p-4 md:p-8
           "
         >
           {children}
