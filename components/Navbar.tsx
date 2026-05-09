@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 export default function Navbar() {
 
@@ -41,13 +41,13 @@ export default function Navbar() {
   ];
 
   // Drawer animation variants
-  const overlayVariants = {
+  const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
     exit: { opacity: 0 },
   };
 
-  const drawerVariants = {
+  const drawerVariants: Variants = {
     hidden: {
       x: "100%",
       opacity: 0.5,
@@ -78,7 +78,7 @@ export default function Navbar() {
     },
   };
 
-  const linkVariants = {
+  const linkVariants: Variants = {
     hidden: {
       x: 60,
       opacity: 0,
@@ -104,7 +104,7 @@ export default function Navbar() {
     },
   };
 
-  const headerVariants = {
+  const headerVariants: Variants = {
     hidden: {
       opacity: 0,
       y: -20,
