@@ -1,0 +1,297 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import {
+  collection,
+  getDocs,
+} from "firebase/firestore";
+
+import {
+  Copy,
+  Check,
+} from "lucide-react";
+
+import { db } from "@/lib/firebase";
+
+interface PaymentMethod {
+  id: string;
+  name: string;
+  image: string;
+  value: string;
+  active: boolean;
+}
+
+export default function PaymentMethods() {
+  const [payments, setPayments] = useState<PaymentMethod[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, "payments")
+        );
+
+        const data: PaymentMethod[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<PaymentMethod, "id">),
+        }));
+
+        setPayments(data.filter((item) => item.active));
+      } catch (error) {
+        console.error("Error fetching payments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPayments();
+  }, []);
+
+  // Copy
+  const handleCopy = async (
+    value: string,
+    id: string
+  ) => {
+    try {
+      await navigator.clipboard.writeText(value);
+
+      setCopiedId(id);
+
+      setTimeout(() => {
+        setCopiedId(null);
+      }, 2000);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <section
+      id="payments"
+      dir="rtl"
+      className="
+        py-24 px-6
+        relative overflow-hidden
+      "
+    >
+      {/* Glow */}
+      <div
+        className="
+          absolute inset-0
+          bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.05),transparent_60%)]
+          pointer-events-none
+        "
+      ></div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-16">
+
+          <div
+            className="
+              inline-flex
+              mb-5
+              text-yellow-500
+              bg-yellow-500/10
+              border border-yellow-500/20
+              px-5 py-2
+              rounded-full
+              text-sm font-semibold
+            "
+          >
+            PAYMENT METHODS
+          </div>
+
+          <h2
+            className="
+              text-white
+              text-5xl md:text-6xl
+              font-black
+              mb-6
+            "
+          >
+            طرق الدفع المتاحة
+          </h2>
+
+          <p
+            className="
+              text-zinc-400
+              text-lg
+              max-w-2xl
+              mx-auto
+              leading-9
+            "
+          >
+            جميع وسائل الدفع المتاحة لدينا لتحويل الأموال بسهولة وأمان.
+          </p>
+        </div>
+
+        {/* Loading */}
+        {loading ? (
+          <div
+            className="
+              grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5
+              gap-6
+            "
+          >
+            {[1, 2, 3, 4, 5].map((item) => (
+              <div
+                key={item}
+                className="
+                  h-[250px]
+                  rounded-[32px]
+                  bg-zinc-900
+                  border border-zinc-800
+                  animate-pulse
+                "
+              ></div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Cards */}
+            <div
+              className="
+                grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5
+                gap-6
+              "
+            >
+              {payments.map((item) => (
+                <div
+                  key={item.id}
+                  className="
+                    group
+                    relative
+                    overflow-hidden
+                    rounded-[32px]
+                    border border-zinc-800
+                    bg-[#0B0B0B]
+                    p-7
+                    hover:border-yellow-500/30
+                    hover:-translate-y-2
+                    transition-all duration-500
+                  "
+                >
+                  {/* Glow */}
+                  <div
+                    className="
+                      absolute top-0 right-0
+                      w-32 h-32
+                      bg-yellow-500/5
+                      blur-3xl
+                    "
+                  ></div>
+
+                  {/* Logo */}
+                  <div
+                    className="
+                      relative
+                      h-[90px]
+                      flex items-center justify-center
+                      mb-8
+                    "
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="
+                        max-h-[52px]
+                        object-contain
+                        group-hover:scale-110
+                        transition-all duration-500
+                      "
+                    />
+                  </div>
+
+                  {/* Name */}
+                  <h3
+                    className="
+                      text-white
+                      text-center
+                      text-lg
+                      font-black
+                      mb-4
+                    "
+                  >
+                    {item.name}
+                  </h3>
+
+                  {/* Value */}
+                  <div
+                    className="
+                      bg-black/50
+                      border border-zinc-800
+                      rounded-2xl
+                      px-4 py-3
+                      mb-6
+                    "
+                  >
+                    <p
+                      className="
+                        text-zinc-300
+                        text-sm
+                        text-center
+                        break-all
+                        leading-7
+                      "
+                    >
+                      {item.value}
+                    </p>
+                  </div>
+
+                  {/* Copy Button */}
+                  <button
+                    onClick={() =>
+                      handleCopy(item.value, item.id)
+                    }
+                    className="
+                      w-full
+                      bg-yellow-500/10
+                      hover:bg-yellow-500
+                      border border-yellow-500/20
+                      hover:border-yellow-500
+                      text-yellow-500
+                      hover:text-black
+                      font-bold
+                      py-3
+                      rounded-2xl
+                      flex items-center justify-center gap-2
+                      transition-all duration-300
+                    "
+                  >
+                    {copiedId === item.id ? (
+                      <>
+                        <Check size={18} />
+                        تم النسخ
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={18} />
+                        نسخ البيانات
+                      </>
+                    )}
+                  </button>
+
+                </div>
+              ))}
+            </div>
+
+            {/* Empty */}
+            {payments.length === 0 && (
+              <div className="text-center text-zinc-500 mt-16 text-xl">
+                لا توجد طرق دفع حالياً
+              </div>
+            )}
+          </>
+        )}
+
+      </div>
+    </section>
+  );
+}

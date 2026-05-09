@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  /* تعريف ألوان البراند الخاصة بك */
+  --color-dark-bg: #070707;
+  --color-card-bg: #121212;
+  --color-brand-yellow: #FACC15;
+  --color-brand-gray: #A1A1AA;
+  
+  /* تعريف الخطوط إذا أردت */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #070707;
+  --foreground: #ededed;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body::before {
+  content:
+    "TRUST LICENSED • youssef • TRUST LICENSED • youssef";
+
+  position: fixed;
+  inset: -200%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 90px;
+  font-weight: 900;
+
+  color: rgba(212, 175, 55, 0.4);
+
+  transform: rotate(-30deg);
+
+  letter-spacing: 10px;
+
+  z-index: 999999;
+
+  pointer-events: none;
+  user-select: none;
+
+  white-space: nowrap;
+
+  animation: watermarkMove 40s linear infinite;
+}
+
+@keyframes watermarkMove {
+  0% {
+    transform:
+      rotate(-30deg)
+      translateX(0);
+  }
+
+  100% {
+    transform:
+      rotate(-30deg)
+      translateX(300px);
+  }
+}
