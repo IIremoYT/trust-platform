@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import {
   collection,
@@ -10,11 +11,10 @@ import {
 import {
   Star,
   ShieldCheck,
+  ArrowLeft,
 } from "lucide-react";
 
 import { db } from "@/lib/firebase";
-
-import { motion } from "framer-motion";
 
 interface Review {
   id: string;
@@ -41,16 +41,9 @@ export default function Reviews() {
           ...(doc.data() as Omit<Review, "id">),
         }));
 
-        // Active Only
-        const activeReviews = data.filter(
-          (item) => item.active
+        setReviews(
+          data.filter((item) => item.active)
         );
-
-        // Duplicate for infinite slider
-        setReviews([
-          ...activeReviews,
-          ...activeReviews,
-        ]);
 
       } catch (error) {
         console.error(error);
@@ -62,90 +55,30 @@ export default function Reviews() {
     fetchReviews();
   }, []);
 
-  // Loading
-  if (loading) {
-    return (
-      <section
-        className="
-          py-24
-          bg-[#050505]
-        "
-      >
-        <div
-          className="
-            max-w-7xl
-            mx-auto
-            px-6
-          "
-        >
-          <div
-            className="
-              grid
-              grid-cols-1
-              md:grid-cols-2
-              lg:grid-cols-4
-              gap-6
-            "
-          >
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="
-                  h-[250px]
-                  rounded-[32px]
-                  bg-zinc-900
-                  border border-zinc-800
-                  animate-pulse
-                "
-              ></div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Show only 6
+  const visibleReviews = reviews.slice(0, 6);
 
-  // Empty
-  if (reviews.length === 0) {
-    return (
-      <section
-        id="reviews"
-        className="
-          py-24
-          bg-[#050505]
-          text-center
-        "
-      >
-        <h2
-          className="
-            text-white
-            text-4xl
-            font-black
-            mb-4
-          "
-        >
-          آراء عملائنا
-        </h2>
-
-        <p className="text-zinc-500">
-          لا توجد تقييمات حالياً
-        </p>
-      </section>
-    );
-  }
+  // Average Rating
+  const averageRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce(
+            (acc, item) => acc + item.rating,
+            0
+          ) / reviews.length
+        ).toFixed(1)
+      : "5.0";
 
   return (
     <section
       id="reviews"
       dir="rtl"
       className="
-        py-24
-        bg-[#050505]
-        overflow-hidden
-        relative
+        py-24 px-6
+        relative overflow-hidden
       "
     >
-      {/* Background Glow */}
+      {/* Glow */}
       <div
         className="
           absolute inset-0
@@ -154,299 +87,267 @@ export default function Reviews() {
         "
       ></div>
 
-      {/* Header */}
-      <div
-        className="
-          max-w-7xl
-          mx-auto
-          px-6
-          mb-16
-          text-center
-          relative z-10
-        "
-      >
-        <div
-          className="
-            inline-flex items-center gap-2
-            mb-5
-            text-yellow-500
-            bg-yellow-500/10
-            border border-yellow-500/20
-            px-5 py-2
-            rounded-full
-            text-sm font-semibold
-          "
-        >
-          <ShieldCheck size={16} />
-          VERIFIED REVIEWS
-        </div>
+      <div className="relative z-10 max-w-7xl mx-auto">
 
-        <h2
-          className="
-            text-white
-            text-4xl md:text-5xl
-            font-black
-            mb-5
-          "
-        >
-          آراء عملائنا
-        </h2>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-14">
 
-        <p
-          className="
-            text-zinc-500
-            text-lg
-          "
-        >
-          نحن نفخر بثقتكم الدائمة بنا
-        </p>
-      </div>
+          <div>
 
-{/* Buttons */}
-<div
-  className="
-    flex flex-col sm:flex-row
-    items-center justify-center
-    gap-4
-    mb-14
-    relative z-10
-  "
->
-
-  {/* Add Review */}
-  <a
-    href="/reviews"
-    className="
-      bg-yellow-500
-      hover:bg-yellow-400
-
-      text-black
-      font-bold
-
-      px-8 py-4
-      rounded-2xl
-
-      transition-all duration-300
-
-      shadow-[0_0_30px_rgba(250,204,21,0.2)]
-    "
-  >
-    اكتب رأيك
-  </a>
-
-  {/* Show All */}
-  <a
-    href="/reviews"
-    className="
-      border border-zinc-700
-      hover:border-yellow-500
-      hover:text-yellow-500
-      hover:bg-yellow-500/5
-
-      text-white
-      font-bold
-
-      px-8 py-4
-      rounded-2xl
-
-      transition-all duration-300
-    "
-  >
-    عرض كل التقييمات
-  </a>
-
-</div>
-
-      {/* Slider */}
-      <div className="relative group">
-
-        <motion.div
-          className="
-            flex gap-6
-            w-max
-          "
-          animate={{
-            x: ["0%", "-50%"],
-          }}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 30,
-              ease: "linear",
-            },
-          }}
-        >
-          {reviews.map((review, index) => (
+            {/* Badge */}
             <div
-              key={`${review.id}-${index}`}
               className="
-                w-[340px]
-                md:w-[360px]
-
-                group/card
-                relative
-                overflow-hidden
-
-                bg-[#0B0B0B]
-                border border-zinc-800
-
-                rounded-[32px]
-
-                p-8
-
-                hover:border-yellow-500/30
-                hover:-translate-y-2
-
-                transition-all duration-500
-
-                shrink-0
+                inline-flex items-center gap-2
+                mb-4
+                text-yellow-500
+                bg-yellow-500/10
+                border border-yellow-500/20
+                px-5 py-2
+                rounded-full
+                text-sm font-semibold
               "
             >
-              {/* Glow */}
-              <div
-                className="
-                  absolute top-0 right-0
-                  w-40 h-40
-                  bg-yellow-500/5
-                  blur-3xl
-                "
-              ></div>
+              <ShieldCheck size={16} />
+              VERIFIED REVIEWS
+            </div>
 
-              {/* Top */}
-              <div className="flex items-center justify-between mb-5">
+            {/* Title */}
+            <h2
+              className="
+                text-white
+                text-4xl md:text-5xl
+                font-black
+                mb-4
+              "
+            >
+              آراء العملاء
+            </h2>
 
-                {/* Stars */}
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={15}
-                      className={
-                        i < review.rating
-                          ? "fill-yellow-500 text-yellow-500"
-                          : "text-zinc-700"
-                      }
-                    />
-                  ))}
-                </div>
-
-                {/* Verified */}
-                <div
-                  className="
-                    flex items-center gap-1
-
-                    text-[10px]
-                    text-green-400
-
-                    bg-green-500/10
-                    border border-green-500/20
-
-                    px-3 py-1
-                    rounded-full
-                  "
-                >
-                  <ShieldCheck size={10} />
-                  <span>موثق</span>
-                </div>
-
+            {/* Average */}
+            <div
+              className="
+                flex items-center gap-3
+                text-zinc-400
+              "
+            >
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={18}
+                    className="
+                      fill-yellow-500
+                      text-yellow-500
+                    "
+                  />
+                ))}
               </div>
 
-              {/* Comment */}
-              <p
-                className="
-                  text-zinc-300
-                  text-sm
-                  leading-8
+              <span className="text-sm">
+                {averageRating}/5 بناءً على{" "}
+                {reviews.length} تقييم
+              </span>
+            </div>
+          </div>
 
-                  mb-8
+          {/* Show More */}
+          <Link
+            href="/reviews"
+            className="
+              hidden md:flex
+              items-center gap-2
+              text-yellow-500
+              hover:text-yellow-400
+              transition-all duration-300
+            "
+          >
+            عرض الكل
+            <ArrowLeft size={18} />
+          </Link>
+        </div>
 
-                  min-h-[110px]
-                "
-              >
-                "{review.comment}"
-              </p>
-
-              {/* User */}
+        {/* Loading */}
+        {loading ? (
+          <div
+            className="
+              grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+              gap-6
+            "
+          >
+            {[1, 2, 3, 4, 5, 6].map((item) => (
               <div
+                key={item}
                 className="
-                  flex items-center gap-3
-
-                  border-t border-white/5
-                  pt-5
+                  h-[280px]
+                  rounded-[32px]
+                  bg-zinc-900
+                  border border-zinc-800
+                  animate-pulse
                 "
-              >
-                {/* Avatar */}
+              ></div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Reviews Grid */}
+            <div
+              className="
+                grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+                gap-6
+              "
+            >
+              {visibleReviews.map((review) => (
                 <div
+                  key={review.id}
                   className="
-                    w-12 h-12
+                    group
+                    relative
+                    overflow-hidden
+                    rounded-[32px]
+                    border border-zinc-800
+                    bg-[#0B0B0B]
+                    p-8
+                    hover:border-yellow-500/30
+                    hover:-translate-y-2
+                    transition-all duration-500
+                  "
+                >
+                  {/* Glow */}
+                  <div
+                    className="
+                      absolute top-0 right-0
+                      w-40 h-40
+                      bg-yellow-500/5
+                      blur-3xl
+                    "
+                  ></div>
+
+                  {/* Top */}
+                  <div className="flex items-center justify-between mb-6">
+
+                    {/* Stars */}
+                    <div className="flex items-center gap-1">
+                      {[...Array(review.rating)].map((_, index) => (
+                        <Star
+                          key={index}
+                          size={18}
+                          className="
+                            fill-yellow-500
+                            text-yellow-500
+                          "
+                        />
+                      ))}
+                    </div>
+
+                    {/* Verified */}
+                    <div
+                      className="
+                        flex items-center gap-1
+                        text-green-400
+                        text-xs
+                        bg-green-500/10
+                        border border-green-500/20
+                        px-3 py-1
+                        rounded-full
+                      "
+                    >
+                      <ShieldCheck size={12} />
+                      موثق
+                    </div>
+
+                  </div>
+
+                  {/* Comment */}
+                  <p
+                    className="
+                      text-zinc-300
+                      text-lg
+                      leading-9
+                      mb-10
+                    "
+                  >
+                    "{review.comment}"
+                  </p>
+
+                  {/* User */}
+                  <div className="flex items-center gap-4">
+
+                    {/* Avatar */}
+                    <div
+                      className="
+                        w-14 h-14
+                        rounded-2xl
+                        bg-yellow-500/10
+                        border border-yellow-500/20
+                        flex items-center justify-center
+                        text-yellow-500
+                        font-black
+                        text-lg
+                      "
+                    >
+                      {review.name.charAt(0)}
+                    </div>
+
+                    {/* Info */}
+                    <div>
+                      <h3
+                        className="
+                          text-white
+                          font-bold
+                          text-lg
+                        "
+                      >
+                        {review.name}
+                      </h3>
+
+                      <p className="text-zinc-500 text-sm">
+                        عميل حقيقي
+                      </p>
+                    </div>
+
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Main Button */}
+            {reviews.length > 0 && (
+              <div className="flex justify-center mt-14">
+                <Link
+                  href="/reviews"
+                  className="
+                    inline-flex items-center justify-center
+
+                    bg-yellow-500
+                    hover:bg-yellow-400
+
+                    text-black
+                    font-bold
+
+                    px-10 py-4
 
                     rounded-2xl
 
-                    bg-yellow-500/10
-                    border border-yellow-500/20
+                    transition-all duration-300
 
-                    flex items-center justify-center
+                    shadow-[0_0_40px_rgba(250,204,21,0.25)]
 
-                    text-yellow-500
-                    font-black
+                    hover:scale-105
                   "
                 >
-                  {review.name.charAt(0)}
-                </div>
-
-                {/* Info */}
-                <div>
-                  <h3
-                    className="
-                      text-white
-                      font-bold
-                      text-sm
-                    "
-                  >
-                    {review.name}
-                  </h3>
-
-                  <p
-                    className="
-                      text-zinc-500
-                      text-xs
-                    "
-                  >
-                    عميل موثق
-                  </p>
-                </div>
+                  مشاهدة جميع التقييمات
+                </Link>
               </div>
+            )}
 
-            </div>
-          ))}
-        </motion.div>
-
-        {/* Left Fade */}
-        <div
-          className="
-            absolute inset-y-0 left-0
-            w-32
-            bg-gradient-to-r
-            from-[#050505]
-            to-transparent
-            z-10
-            pointer-events-none
-          "
-        ></div>
-
-        {/* Right Fade */}
-        <div
-          className="
-            absolute inset-y-0 right-0
-            w-32
-            bg-gradient-to-l
-            from-[#050505]
-            to-transparent
-            z-10
-            pointer-events-none
-          "
-        ></div>
+            {/* Empty */}
+            {reviews.length === 0 && (
+              <div className="text-center text-zinc-500 mt-10">
+                لا توجد تقييمات حالياً
+              </div>
+            )}
+          </>
+        )}
 
       </div>
     </section>
