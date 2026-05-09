@@ -21,7 +21,7 @@ export default function AdminLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // لو الدخول نجح، وديه على صفحة المراجعات كبداية
-      router.push("/admin/reviews");
+      router.push("/admin/dashboard");
     } catch (err: any) {
       setError("بيانات الدخول غير صحيحة يا يوسف، راجع الإيميل والباسورد.");
     } finally {

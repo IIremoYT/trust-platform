@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 
 import {
@@ -13,6 +13,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { motion, useInView } from "framer-motion";
+
 import { db } from "@/lib/firebase";
 
 interface Proof {
@@ -22,11 +24,133 @@ interface Proof {
   active: boolean;
 }
 
+// Animated card wrapper
+function ProofCard({
+  item,
+  index,
+}: {
+  item: Proof;
+  index: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, {
+    once: true,
+    margin: "-60px",
+  });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50, scale: 0.92 }}
+      animate={
+        isInView
+          ? { opacity: 1, y: 0, scale: 1 }
+          : { opacity: 0, y: 50, scale: 0.92 }
+      }
+      transition={{
+        duration: 0.6,
+        delay: index * 0.1,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+    >
+      <Link
+        href={`/proofs/${item.id}`}
+        className="
+          group
+          relative
+          overflow-hidden
+          rounded-[32px]
+          border border-zinc-800
+          bg-[#0B0B0B]
+          hover:border-yellow-500/40
+          hover:-translate-y-2
+          transition-all duration-500
+          block
+        "
+      >
+        {/* Glow */}
+        <div
+          className="
+            absolute top-0 right-0
+            w-32 h-32
+            bg-yellow-500/5
+            blur-3xl
+          "
+        ></div>
+
+        {/* Image */}
+        <img
+          src={item.image || "/placeholder.jpg"}
+          alt={item.title}
+          className="
+            w-full
+            aspect-[3/4]
+            object-cover
+            group-hover:scale-105
+            transition-all duration-700
+          "
+        />
+
+        {/* Overlay */}
+        <div
+          className="
+            absolute inset-0
+            bg-gradient-to-t
+            from-black/80
+            via-transparent
+            to-transparent
+          "
+        ></div>
+
+        {/* Bottom */}
+        <div
+          className="
+            absolute bottom-0 right-0 left-0
+            p-5
+          "
+        >
+          <h3
+            className="
+              text-white
+              text-sm md:text-base
+              font-bold
+              mb-2
+            "
+          >
+            {item.title || "إثبات ناجح"}
+          </h3>
+
+          <span
+            className="
+              inline-flex
+              text-yellow-500
+              text-xs
+              bg-yellow-500/10
+              border border-yellow-500/20
+              px-3 py-1
+              rounded-full
+            "
+          >
+            موثق
+          </span>
+        </div>
+
+      </Link>
+    </motion.div>
+  );
+}
+
 export default function Proofs() {
   const [proofs, setProofs] = useState<Proof[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [startIndex, setStartIndex] = useState(0);
+
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const headerInView = useInView(sectionRef, {
+    once: true,
+    margin: "-80px",
+  });
 
   // Fetch
   useEffect(() => {
@@ -92,10 +216,19 @@ export default function Proofs() {
         "
       ></div>
 
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div ref={sectionRef} className="relative z-10 max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-14">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={
+            headerInView
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: 30 }
+          }
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center justify-between mb-14"
+        >
 
           <div>
             <div
@@ -139,7 +272,7 @@ export default function Proofs() {
             عرض الكل
             <ArrowLeft size={18} />
           </Link>
-        </div>
+        </motion.div>
 
         {/* Loading */}
         {loading ? (
@@ -167,94 +300,16 @@ export default function Proofs() {
             {/* Proofs */}
             <div
               className="
-                grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5
-                gap-6
+                grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5
+                gap-5 sm:gap-6
               "
             >
               {visibleProofs.map((item, index) => (
-                <Link
+                <ProofCard
                   key={`${item.id}-${index}`}
-                  href={`/proofs/${item.id}`}
-                  className="
-                    group
-                    relative
-                    overflow-hidden
-                    rounded-[32px]
-                    border border-zinc-800
-                    bg-[#0B0B0B]
-                    hover:border-yellow-500/40
-                    hover:-translate-y-2
-                    transition-all duration-500
-                  "
-                >
-                  {/* Glow */}
-                  <div
-                    className="
-                      absolute top-0 right-0
-                      w-32 h-32
-                      bg-yellow-500/5
-                      blur-3xl
-                    "
-                  ></div>
-
-                  {/* Image */}
-                  <img
-                    src={item.image || "/placeholder.jpg"}
-                    alt={item.title}
-                    className="
-                      w-full
-                      aspect-[3/4]
-                      object-cover
-                      group-hover:scale-105
-                      transition-all duration-700
-                    "
-                  />
-
-                  {/* Overlay */}
-                  <div
-                    className="
-                      absolute inset-0
-                      bg-gradient-to-t
-                      from-black/80
-                      via-transparent
-                      to-transparent
-                    "
-                  ></div>
-
-                  {/* Bottom */}
-                  <div
-                    className="
-                      absolute bottom-0 right-0 left-0
-                      p-5
-                    "
-                  >
-                    <h3
-                      className="
-                        text-white
-                        text-sm md:text-base
-                        font-bold
-                        mb-2
-                      "
-                    >
-                      {item.title || "إثبات ناجح"}
-                    </h3>
-
-                    <span
-                      className="
-                        inline-flex
-                        text-yellow-500
-                        text-xs
-                        bg-yellow-500/10
-                        border border-yellow-500/20
-                        px-3 py-1
-                        rounded-full
-                      "
-                    >
-                      موثق
-                    </span>
-                  </div>
-
-                </Link>
+                  item={item}
+                  index={index}
+                />
               ))}
             </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import {
   collection,
@@ -12,6 +12,8 @@ import {
   Check,
 } from "lucide-react";
 
+import { motion, useInView } from "framer-motion";
+
 import { db } from "@/lib/firebase";
 
 interface PaymentMethod {
@@ -22,11 +24,166 @@ interface PaymentMethod {
   active: boolean;
 }
 
+// Animated payment card
+function PaymentCard({
+  item,
+  index,
+  copiedId,
+  onCopy,
+}: {
+  item: PaymentMethod;
+  index: number;
+  copiedId: string | null;
+  onCopy: (value: string, id: string) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, {
+    once: true,
+    margin: "-50px",
+  });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 45, scale: 0.93 }}
+      animate={
+        isInView
+          ? { opacity: 1, y: 0, scale: 1 }
+          : { opacity: 0, y: 45, scale: 0.93 }
+      }
+      transition={{
+        duration: 0.6,
+        delay: index * 0.08,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      className="
+        group
+        relative
+        overflow-hidden
+        rounded-[32px]
+        border border-zinc-800
+        bg-[#0B0B0B]
+        p-7
+        hover:border-yellow-500/30
+        hover:-translate-y-2
+        transition-all duration-500
+      "
+    >
+      {/* Glow */}
+      <div
+        className="
+          absolute top-0 right-0
+          w-32 h-32
+          bg-yellow-500/5
+          blur-3xl
+        "
+      ></div>
+
+      {/* Logo */}
+      <div
+        className="
+          relative
+          h-[90px]
+          flex items-center justify-center
+          mb-8
+        "
+      >
+        <img
+          src={item.image}
+          alt={item.name}
+          className="
+            max-h-[52px]
+            object-contain
+            group-hover:scale-110
+            transition-all duration-500
+          "
+        />
+      </div>
+
+      {/* Name */}
+      <h3
+        className="
+          text-white
+          text-center
+          text-lg
+          font-black
+          mb-4
+        "
+      >
+        {item.name}
+      </h3>
+
+      {/* Value */}
+      <div
+        className="
+          bg-black/50
+          border border-zinc-800
+          rounded-2xl
+          px-4 py-3
+          mb-6
+        "
+      >
+        <p
+          className="
+            text-zinc-300
+            text-sm
+            text-center
+            break-all
+            leading-7
+          "
+        >
+          {item.value}
+        </p>
+      </div>
+
+      {/* Copy Button */}
+      <button
+        onClick={() =>
+          onCopy(item.value, item.id)
+        }
+        className="
+          w-full
+          bg-yellow-500/10
+          hover:bg-yellow-500
+          border border-yellow-500/20
+          hover:border-yellow-500
+          text-yellow-500
+          hover:text-black
+          font-bold
+          py-3
+          rounded-2xl
+          flex items-center justify-center gap-2
+          transition-all duration-300
+        "
+      >
+        {copiedId === item.id ? (
+          <>
+            <Check size={18} />
+            تم النسخ
+          </>
+        ) : (
+          <>
+            <Copy size={18} />
+            نسخ البيانات
+          </>
+        )}
+      </button>
+
+    </motion.div>
+  );
+}
+
 export default function PaymentMethods() {
   const [payments, setPayments] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const headerInView = useInView(sectionRef, {
+    once: true,
+    margin: "-80px",
+  });
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -88,10 +245,19 @@ export default function PaymentMethods() {
         "
       ></div>
 
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div ref={sectionRef} className="relative z-10 max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={
+            headerInView
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: 30 }
+          }
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-16"
+        >
 
           <div
             className="
@@ -130,7 +296,7 @@ export default function PaymentMethods() {
           >
             جميع وسائل الدفع المتاحة لدينا لتحويل الأموال بسهولة وأمان.
           </p>
-        </div>
+        </motion.div>
 
         {/* Loading */}
         {loading ? (
@@ -159,126 +325,17 @@ export default function PaymentMethods() {
             <div
               className="
                 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5
-                gap-6
+                gap-5 sm:gap-6
               "
             >
-              {payments.map((item) => (
-                <div
+              {payments.map((item, index) => (
+                <PaymentCard
                   key={item.id}
-                  className="
-                    group
-                    relative
-                    overflow-hidden
-                    rounded-[32px]
-                    border border-zinc-800
-                    bg-[#0B0B0B]
-                    p-7
-                    hover:border-yellow-500/30
-                    hover:-translate-y-2
-                    transition-all duration-500
-                  "
-                >
-                  {/* Glow */}
-                  <div
-                    className="
-                      absolute top-0 right-0
-                      w-32 h-32
-                      bg-yellow-500/5
-                      blur-3xl
-                    "
-                  ></div>
-
-                  {/* Logo */}
-                  <div
-                    className="
-                      relative
-                      h-[90px]
-                      flex items-center justify-center
-                      mb-8
-                    "
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="
-                        max-h-[52px]
-                        object-contain
-                        group-hover:scale-110
-                        transition-all duration-500
-                      "
-                    />
-                  </div>
-
-                  {/* Name */}
-                  <h3
-                    className="
-                      text-white
-                      text-center
-                      text-lg
-                      font-black
-                      mb-4
-                    "
-                  >
-                    {item.name}
-                  </h3>
-
-                  {/* Value */}
-                  <div
-                    className="
-                      bg-black/50
-                      border border-zinc-800
-                      rounded-2xl
-                      px-4 py-3
-                      mb-6
-                    "
-                  >
-                    <p
-                      className="
-                        text-zinc-300
-                        text-sm
-                        text-center
-                        break-all
-                        leading-7
-                      "
-                    >
-                      {item.value}
-                    </p>
-                  </div>
-
-                  {/* Copy Button */}
-                  <button
-                    onClick={() =>
-                      handleCopy(item.value, item.id)
-                    }
-                    className="
-                      w-full
-                      bg-yellow-500/10
-                      hover:bg-yellow-500
-                      border border-yellow-500/20
-                      hover:border-yellow-500
-                      text-yellow-500
-                      hover:text-black
-                      font-bold
-                      py-3
-                      rounded-2xl
-                      flex items-center justify-center gap-2
-                      transition-all duration-300
-                    "
-                  >
-                    {copiedId === item.id ? (
-                      <>
-                        <Check size={18} />
-                        تم النسخ
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={18} />
-                        نسخ البيانات
-                      </>
-                    )}
-                  </button>
-
-                </div>
+                  item={item}
+                  index={index}
+                  copiedId={copiedId}
+                  onCopy={handleCopy}
+                />
               ))}
             </div>
 

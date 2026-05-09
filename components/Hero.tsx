@@ -149,7 +149,7 @@ export default function HeroSection() {
 
               {/* Image */}
               <img
-                src="/shield.png"
+                src="/shield.webp"
                 alt="Trust Shield"
                 className="
                   relative
