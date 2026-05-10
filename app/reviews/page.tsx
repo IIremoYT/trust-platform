@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 
 import {
   collection,
@@ -17,9 +18,14 @@ import { motion, useInView } from "framer-motion";
 import { db } from "@/lib/firebase";
 import { trustToast } from "@/components/TrustToast";
 
+interface ReCaptcha {
+  ready: (callback: () => void) => void;
+  execute: (siteKey: string | undefined, options: { action: string }) => Promise<string>;
+}
+
 declare global {
   interface Window {
-    grecaptcha: any;
+    grecaptcha: ReCaptcha;
   }
 }
 
@@ -163,10 +169,10 @@ export default function ReviewsPage() {
       setRating(5);
       setLastSubmit(Date.now());
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       if (loadingId) trustToast.dismiss(loadingId);
-      trustToast.error("حدث خطأ", error.message || "يرجى المحاولة مرة أخرى");
+      trustToast.error("حدث خطأ", error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى");
     } finally {
       setSending(false);
     }
@@ -278,7 +284,7 @@ export default function ReviewsPage() {
           </a>
 
           {/* Back Home */}
-          <a
+          <Link
             href="/"
             className="
               border border-zinc-700
@@ -297,7 +303,7 @@ export default function ReviewsPage() {
             "
           >
             العودة للرئيسية
-          </a>
+          </Link>
 
         </div>
 

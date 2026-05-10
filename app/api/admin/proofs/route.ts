@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Unauthorized or Internal Error" }, { status: 401 });
   }
 }
@@ -37,7 +37,7 @@ export async function PATCH(req: Request) {
 
     await adminDb.collection("proofs").doc(id).update({ active });
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Unauthorized or Internal Error" }, { status: 401 });
   }
 }
@@ -50,7 +50,7 @@ export async function DELETE(req: Request) {
 
     await adminDb.collection("proofs").doc(id).delete();
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Unauthorized or Internal Error" }, { status: 401 });
   }
 }

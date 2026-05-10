@@ -5,7 +5,7 @@ import {
   collection, 
   getDocs,
 } from "firebase/firestore";
-import { Check, Trash2, Star, X, Eye, EyeOff } from "lucide-react";
+import { Trash2, Star, Eye, EyeOff } from "lucide-react";
 import { db } from "@/lib/firebase";
 
 interface Review {
@@ -37,7 +37,9 @@ export default function AdminReviewsPage() {
   };
 
   useEffect(() => {
-    fetchReviews();
+    setTimeout(() => {
+      fetchReviews();
+    }, 0);
   }, []);
 
   // دمجنا الـ Toggle logic عشان نحدث الـ State فوراً (Optimistic UI)
@@ -112,7 +114,7 @@ export default function AdminReviewsPage() {
                   </div>
                 </div>
 
-                <p className="text-zinc-300 leading-7 mb-8 min-h-[80px]">"{review.comment}"</p>
+                <p className="text-zinc-300 leading-7 mb-8 min-h-[80px]">&quot;{review.comment}&quot;</p>
 
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500 font-black text-xl">

@@ -27,6 +27,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // --- Analytics (aggregate stats only, not sensitive) ---
+    match /analytics/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Default block
     match /{document=**} {
       allow read, write: if false;

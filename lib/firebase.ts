@@ -16,11 +16,8 @@ const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize App Check only on the client side
-if (typeof window !== "undefined") {
-  // @ts-ignore - to prevent build errors if the key is missing in some environments
-  self.FIREBASE_APPCHECK_DEBUG_TOKEN = process.env.NODE_ENV !== 'production';
-  
+// Initialize App Check only in production on the client side
+if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
   if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
     try {
       initializeAppCheck(app, {

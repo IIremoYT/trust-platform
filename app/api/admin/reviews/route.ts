@@ -17,7 +17,7 @@ export async function PATCH(req: Request) {
 
     await adminDb.collection("reviews").doc(id).update({ active });
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Unauthorized or Internal Error" }, { status: 401 });
   }
 }
@@ -30,7 +30,7 @@ export async function DELETE(req: Request) {
 
     await adminDb.collection("reviews").doc(id).delete();
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Unauthorized or Internal Error" }, { status: 401 });
   }
 }

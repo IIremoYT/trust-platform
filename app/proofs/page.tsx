@@ -27,7 +27,9 @@ export default function ProofsPage() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 1024);
+    setTimeout(() => {
+      setIsMobile(window.innerWidth < 1024);
+    }, 0);
   }, []);
 
   useEffect(() => {

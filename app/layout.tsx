@@ -5,9 +5,7 @@ import Script from "next/script";
 
 import "./globals.css";
 
-import Navbar from "@/components/Navbar";
-import AmbientEffects from "@/components/AmbientEffects";
-import AnnouncementBar from "@/components/AnnouncementBar";
+import ClientLayout from "@/components/ClientLayout";
 
 const cairo = Cairo({
   variable: "--font-cairo",
@@ -37,6 +35,7 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
+      data-scroll-behavior="smooth"
       className={`${cairo.variable} ${inter.variable} h-full antialiased`}
     >
       <body
@@ -44,15 +43,12 @@ export default function RootLayout({
           min-h-full
           flex flex-col
           bg-black
-          pt-28
         "
       >
         <Script 
           src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
           strategy="beforeInteractive"
         />
-        <Navbar />
-        <AmbientEffects />
 
 {/* TRUST LICENSE */}
 <meta
@@ -76,11 +72,10 @@ export default function RootLayout({
           }}
         />
 
-        <div className="page-enter">
+        <ClientLayout>
           {children}
-        </div>
+        </ClientLayout>
 
-        <AnnouncementBar />
       </body>
     </html>
   );

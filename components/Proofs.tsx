@@ -13,7 +13,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 
 import { db } from "@/lib/firebase";
 import ProofViewer from "./ProofViewer";
@@ -44,7 +44,9 @@ function ProofCard({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 1024);
+    setTimeout(() => {
+      setIsMobile(window.innerWidth < 1024);
+    }, 0);
   }, []);
 
   const handleClick = (e: React.MouseEvent) => {

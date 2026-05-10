@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
 import { Lock, User, ShieldCheck } from "lucide-react";
 
 export default function AdminLogin() {
@@ -11,7 +10,6 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +34,7 @@ export default function AdminLogin() {
       } else {
         throw new Error("Failed to create session");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("بيانات الدخول غير صحيحة يا يوسف، راجع الإيميل والباسورد.");
     } finally {

@@ -2,8 +2,8 @@ type LogLevel = "info" | "warn" | "error" | "security";
 
 interface LogPayload {
   message: string;
-  context?: Record<string, any>;
-  error?: any;
+  context?: Record<string, unknown>;
+  error?: unknown;
 }
 
 /**
@@ -56,19 +56,19 @@ class Logger {
     }
   }
 
-  info(message: string, context?: Record<string, any>) {
+  info(message: string, context?: Record<string, unknown>) {
     this.log("info", { message, context });
   }
 
-  warn(message: string, context?: Record<string, any>) {
+  warn(message: string, context?: Record<string, unknown>) {
     this.log("warn", { message, context });
   }
 
-  error(message: string, error?: any, context?: Record<string, any>) {
+  error(message: string, error?: unknown, context?: Record<string, unknown>) {
     this.log("error", { message, error, context });
   }
 
-  security(message: string, context?: Record<string, any>) {
+  security(message: string, context?: Record<string, unknown>) {
     this.log("security", { message, context });
   }
 }

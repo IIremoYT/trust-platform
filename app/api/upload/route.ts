@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
     try {
       await adminAuth.verifySessionCookie(sessionCookie, true);
-    } catch (authError) {
+    } catch {
       logger.security("Upload attempt with invalid session cookie", { ip });
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }

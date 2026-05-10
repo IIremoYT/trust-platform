@@ -10,7 +10,6 @@ import {
 } from "firebase/auth";
 
 import {
-  useRouter,
   usePathname,
 } from "next/navigation";
 
@@ -33,8 +32,6 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
   const pathname =
     usePathname();
 
@@ -52,10 +49,17 @@ export default function AdminLayout({
   ========================= */
 
   useEffect(() => {
-    // The main protection is now Server-Side Middleware (__session cookie).
-    // This client-side check is just for UI readiness.
-    setAuthorized(pathname !== "/admin");
-    setCheckingAuth(false);
+    if (pathname === "/admin") {
+      setTimeout(() => setCheckingAuth(false), 0);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setAuthorized(!!user);
+      setCheckingAuth(false);
+    });
+
+    return () => unsubscribe();
   }, [pathname]);
 
   /* =========================
@@ -183,9 +187,9 @@ export default function AdminLayout({
         h-screen
         relative
 
-        bg-[#050505]
+        bg-black
 
-        text-gray-300
+        text-gray-200
 
         overflow-hidden
       "
@@ -220,9 +224,9 @@ export default function AdminLayout({
           h-full
           w-72
 
-          bg-[#0A0A0A]
+          bg-[#050505]
 
-          border-l border-white/5
+          border-l border-white/10
 
           flex flex-col
 
@@ -260,7 +264,7 @@ export default function AdminLayout({
               className="
                 w-11 h-11
 
-                bg-brand-yellow
+                bg-gradient-to-br from-brand-yellow to-yellow-600
 
                 rounded-2xl
 
@@ -270,7 +274,8 @@ export default function AdminLayout({
                 font-black
                 text-lg
 
-                shadow-[0_0_25px_rgba(212,175,55,0.25)]
+                shadow-[0_0_20px_rgba(212,175,55,0.4)]
+                border border-brand-yellow/30
               "
             >
               T
@@ -290,8 +295,9 @@ export default function AdminLayout({
               <p
                 className="
                   text-[10px]
-                  text-gray-500
+                  text-brand-yellow/70
                   tracking-[0.2em]
+                  font-bold
                 "
               >
                 ADMIN PANEL
@@ -343,7 +349,7 @@ export default function AdminLayout({
                     active
                       ? `
                         bg-gradient-to-l
-                        from-brand-yellow/10
+                        from-brand-yellow/20
                         to-transparent
 
                         border-r-4
@@ -352,7 +358,7 @@ export default function AdminLayout({
                         text-brand-yellow
                       `
                       : `
-                        hover:bg-white/5
+                        hover:bg-white/10
                         hover:text-white
                       `
                   }
@@ -429,9 +435,9 @@ export default function AdminLayout({
           className="
             h-20
 
-            border-b border-white/5
+            border-b border-white/10
 
-            bg-[#0A0A0A]/60
+            bg-[#050505]/80
 
             backdrop-blur-xl
 
@@ -462,7 +468,8 @@ export default function AdminLayout({
 
                 bg-white/5
 
-                border border-white/10
+                border border-white/10 hover:border-white/20 hover:bg-white/10
+                transition-all
 
                 flex items-center justify-center
 
@@ -487,7 +494,7 @@ export default function AdminLayout({
               <p
                 className="
                   text-xs
-                  text-gray-500
+                  text-gray-400
                   mt-1
                   hidden md:block
                 "
@@ -578,10 +585,11 @@ export default function AdminLayout({
                   rounded-full
 
                   bg-gradient-to-br
-                  from-gray-700
-                  to-gray-900
+                  from-zinc-800
+                  to-black
 
                   border border-white/10
+                  shadow-[0_0_15px_rgba(255,255,255,0.05)]
 
                   flex items-center justify-center
                 "

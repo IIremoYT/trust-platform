@@ -79,7 +79,9 @@ export default function AdminPayments() {
   };
 
   useEffect(() => {
-    fetchPayments();
+    setTimeout(() => {
+      fetchPayments();
+    }, 0);
   }, []);
 
   /* =========================

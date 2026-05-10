@@ -26,10 +26,19 @@ export default function AdminProofs() {
 
   const [loading, setLoading] = useState(false);
 
-  const [proofs, setProofs] = useState<any[]>([]);
+  interface Proof {
+    id: string;
+    title?: string;
+    image?: string;
+    imageUrl?: string;
+    active?: boolean;
+    createdAt?: { toDate?: () => Date };
+  }
+
+  const [proofs, setProofs] = useState<Proof[]>([]);
   const [fetching, setFetching] = useState(true);
 
-  const [inputKey, setInputKey] = useState(Date.now());
+  const [inputKey, setInputKey] = useState(() => Date.now());
 
   // Fetch Proofs
   const fetchProofs = async () => {
@@ -46,7 +55,7 @@ export default function AdminProofs() {
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as Proof[];
 
       setProofs(data);
 
@@ -61,7 +70,9 @@ export default function AdminProofs() {
   };
 
   useEffect(() => {
-    fetchProofs();
+    setTimeout(() => {
+      fetchProofs();
+    }, 0);
   }, []);
 
   // Upload
@@ -130,7 +141,7 @@ export default function AdminProofs() {
 
         alert("تم الرفع بنجاح ✨");
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(
           "Upload error:",
           error
@@ -138,7 +149,7 @@ export default function AdminProofs() {
 
         alert(
           "خطأ في الرفع: " +
-            error.message
+            (error instanceof Error ? error.message : "يرجى المحاولة مرة أخرى")
         );
       } finally {
         setLoading(false);
@@ -560,7 +571,7 @@ export default function AdminProofs() {
                         onClick={() =>
                           toggleActive(
                             proof.id,
-                            proof.active
+                            !!proof.active
                           )
                         }
                         className={`

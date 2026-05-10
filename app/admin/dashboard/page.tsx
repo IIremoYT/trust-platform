@@ -23,7 +23,6 @@ import {
   CreditCard,
   Users,
   PlusCircle,
-  Settings,
   Eye,
   Trash2,
   ShieldCheck,
@@ -39,9 +38,17 @@ export default function DashboardHome() {
     visitors: 0,
   });
 
+  interface Proof {
+    id: string;
+    image?: string;
+    title?: string;
+    createdAt?: { toDate?: () => Date };
+    active?: boolean;
+  }
+
   // Recent Proofs
   const [recentProofs, setRecentProofs] =
-    useState<any[]>([]);
+    useState<Proof[]>([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -90,7 +97,7 @@ export default function DashboardHome() {
           visitors:
             visitorsSnap.exists()
               ? visitorsSnap.data()
-                  .totalViews || 0
+                .totalViews || 0
               : 0,
         });
 
@@ -117,7 +124,7 @@ export default function DashboardHome() {
             snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
-            }));
+            })) as Proof[];
 
           setRecentProofs(
             proofsData
@@ -198,10 +205,10 @@ export default function DashboardHome() {
 
               mb-4
 
-              text-yellow-500
+              text-brand-yellow
 
-              bg-yellow-500/10
-              border border-yellow-500/20
+              bg-brand-yellow/10
+              border border-brand-yellow/20
 
               px-5 py-2
               rounded-full
@@ -223,7 +230,7 @@ export default function DashboardHome() {
             لوحة التحكم
           </h1>
 
-          <p className="text-zinc-500">
+          <p className="text-gray-400">
             إدارة كاملة للموقع
             والإثباتات والتقييمات
           </p>
@@ -233,8 +240,8 @@ export default function DashboardHome() {
         <Link
           href="/admin/proofs"
           className="
-            bg-yellow-500
-            hover:bg-yellow-400
+            bg-brand-yellow
+            hover:bg-yellow-500
 
             text-black
             font-bold
@@ -245,7 +252,7 @@ export default function DashboardHome() {
 
             transition-all duration-300
 
-            shadow-[0_0_30px_rgba(250,204,21,0.2)]
+            shadow-[0_0_30px_rgba(212,175,55,0.3)]
           "
         >
           إدارة الإثباتات
@@ -267,14 +274,16 @@ export default function DashboardHome() {
             <div
               key={index}
               className="
-                bg-[#0A0A0A]
-                border border-white/5
+                bg-[#0A0A0A]/50
+                backdrop-blur-sm
+                border border-white/10
 
                 rounded-[28px]
 
                 p-6
 
-                hover:border-white/10
+                hover:border-white/20
+                hover:shadow-2xl hover:shadow-brand-yellow/5
 
                 transition-all duration-300
               "
@@ -289,8 +298,9 @@ export default function DashboardHome() {
                 <div>
                   <p
                     className="
-                      text-zinc-500
+                      text-gray-400
                       text-sm
+                      font-medium
                       mb-2
                     "
                   >
@@ -322,8 +332,7 @@ export default function DashboardHome() {
 
               <p
                 className="
-                  text-xs
-                  text-zinc-600
+                  text-gray-500
                 "
               >
                 {stat.sub}
@@ -347,8 +356,9 @@ export default function DashboardHome() {
 
           <section
             className="
-              bg-[#0A0A0A]
-              border border-white/5
+              bg-[#0A0A0A]/50
+              backdrop-blur-sm
+              border border-white/10
 
               rounded-[32px]
 
@@ -378,7 +388,7 @@ export default function DashboardHome() {
                   أحدث الإثباتات
                 </h2>
 
-                <p className="text-zinc-500 text-sm">
+                <p className="text-gray-400 text-sm font-medium">
                   آخر الإثباتات المضافة
                 </p>
               </div>
@@ -386,11 +396,11 @@ export default function DashboardHome() {
               <Link
                 href="/admin/proofs"
                 className="
-                  text-yellow-500
-                  hover:text-yellow-400
+                  text-brand-yellow
+                  hover:text-yellow-500
 
                   text-sm
-                  font-semibold
+                  font-bold
 
                   transition-all
                 "
@@ -418,12 +428,12 @@ export default function DashboardHome() {
               <>
                 {/* Empty */}
                 {recentProofs.length ===
-                0 ? (
+                  0 ? (
                   <div
                     className="
-                      text-center
-                      text-zinc-500
+                      text-gray-400
                       py-24
+                      font-medium
                     "
                   >
                     لا توجد إثباتات حالياً
@@ -440,9 +450,10 @@ export default function DashboardHome() {
                       <thead>
                         <tr
                           className="
-                            border-b border-white/5
-                            text-zinc-500
+                            border-b border-white/10
+                            text-gray-400
                             text-sm
+                            font-medium
                           "
                         >
                           <th className="p-6">
@@ -475,10 +486,10 @@ export default function DashboardHome() {
                                 proof.id
                               }
                               className="
-                                border-b border-white/5
+                                border-b border-white/10
                                 last:border-0
 
-                                hover:bg-white/[0.02]
+                                hover:bg-white/[0.04]
 
                                 transition-all
                               "
@@ -492,8 +503,8 @@ export default function DashboardHome() {
                                     rounded-2xl
                                     overflow-hidden
 
-                                    bg-zinc-900
-                                    border border-white/5
+                                    bg-[#050505]
+                                    border border-white/10
                                   "
                                 >
                                   {proof.image ? (
@@ -512,10 +523,11 @@ export default function DashboardHome() {
                                       className="
                                         w-full h-full
                                         flex items-center justify-center
-                                        text-zinc-700
+                                        text-gray-500
+                                        font-bold
                                       "
                                     >
-                                      IMG
+                                      صورة
                                     </div>
                                   )}
                                 </div>
@@ -531,17 +543,18 @@ export default function DashboardHome() {
                               <td
                                 className="
                                   p-6
-                                  text-zinc-500
+                                  text-gray-400
                                   text-sm
+                                  font-medium
                                 "
                               >
                                 {proof.createdAt
                                   ?.toDate
                                   ? proof.createdAt
-                                      .toDate()
-                                      .toLocaleDateString(
-                                        "ar-EG"
-                                      )
+                                    .toDate()
+                                    .toLocaleDateString(
+                                      "ar-EG"
+                                    )
                                   : "حديثاً"}
                               </td>
 
@@ -558,10 +571,9 @@ export default function DashboardHome() {
 
                                     border
 
-                                    ${
-                                      proof.active
-                                        ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                        : "bg-red-500/10 text-red-500 border-red-500/20"
+                                    ${proof.active
+                                      ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                      : "bg-red-500/10 text-red-500 border-red-500/20"
                                     }
                                   `}
                                 >
