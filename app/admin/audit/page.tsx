@@ -104,10 +104,24 @@ export default function AuditPage() {
                     <p className="text-white text-sm font-semibold">{cfg.label}</p>
 
                     {event.details && Object.keys(event.details).length > 0 && (
-                      <p className="text-zinc-500 text-xs mt-1 truncate">
-                        {Object.entries(event.details)
-                          .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
-                          .join(" • ")}
+                      <p className="text-zinc-500 text-xs mt-1">
+                        {(() => {
+                          const d = event.details!;
+                          // If there's a summary field, show it directly
+                          if (d.summary) return String(d.summary);
+                          // If there's a title, show it
+                          if (d.title) return String(d.title);
+                          // If there's a status change, describe it
+                          if (d.status) {
+                            const statusLabels: Record<string, string> = { draft: "مسودة", published: "منشور", archived: "مؤرشف" };
+                            return `الحالة: ${statusLabels[String(d.status)] || d.status}`;
+                          }
+                          // Fallback: show clean key-value
+                          return Object.entries(d)
+                            .filter(([k]) => k !== "id")
+                            .map(([k, v]) => `${k}: ${v}`)
+                            .join(" • ");
+                        })()}
                       </p>
                     )}
                   </div>

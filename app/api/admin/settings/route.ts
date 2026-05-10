@@ -17,7 +17,17 @@ export async function PATCH(req: Request) {
 
     // The settings will be saved in the 'settings' collection inside the 'global' document
     await adminDb.collection("settings").doc("global").set(settings, { merge: true });
-    logAudit("settings_updated", { keys: Object.keys(settings) });
+
+    // Build human-readable change summary
+    const changes: string[] = [];
+    if (settings.maintenanceMode !== undefined) changes.push(settings.maintenanceMode ? "تفعيل وضع الصيانة" : "إلغاء وضع الصيانة");
+    if (settings.showAnnouncementBar !== undefined) changes.push(settings.showAnnouncementBar ? "تفعيل الشريط الإعلاني" : "إخفاء الشريط الإعلاني");
+    if (settings.announcementText !== undefined) changes.push("تعديل نص الإعلان");
+    if (settings.showAnnouncementButton !== undefined) changes.push(settings.showAnnouncementButton ? "تفعيل زر الأكشن" : "إخفاء زر الأكشن");
+    if (settings.announcementButtonText !== undefined) changes.push("تعديل نص الزر");
+    if (settings.announcementButtonLink !== undefined) changes.push("تعديل رابط الزر");
+
+    logAudit("settings_updated", { summary: changes.join(" • ") || "تحديث الإعدادات" });
 
     return NextResponse.json({ success: true });
   } catch (error) {
