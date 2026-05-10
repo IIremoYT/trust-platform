@@ -25,6 +25,7 @@ import {
   Users,
   Menu,
   X,
+  Settings,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -97,6 +98,13 @@ export default function AdminLayout({
         <CreditCard size={20} />
       ),
       href: "/admin/payments",
+    },
+    {
+      name: "الإعدادات",
+      icon: (
+        <Settings size={20} />
+      ),
+      href: "/admin/settings",
     },
   ];
 

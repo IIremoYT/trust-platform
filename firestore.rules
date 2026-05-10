@@ -33,6 +33,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // --- Settings (Global platform configuration) ---
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Default block
     match /{document=**} {
       allow read, write: if false;

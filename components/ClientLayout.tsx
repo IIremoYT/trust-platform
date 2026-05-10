@@ -25,14 +25,13 @@ export default function ClientLayout({
   // Public pages: full UI
   return (
     <>
+      <AnnouncementBar />
       <Navbar />
       <AmbientEffects />
 
       <div className="page-enter pt-28">
         {children}
       </div>
-
-      <AnnouncementBar />
     </>
   );
 }

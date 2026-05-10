@@ -132,7 +132,7 @@ export default function Navbar() {
       <header
         dir="rtl"
         className="
-          fixed top-0 left-0 w-full z-50
+          sticky top-0 w-full z-50
           px-4 md:px-8 pt-5
         "
       >
