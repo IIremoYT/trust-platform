@@ -47,10 +47,10 @@ export default function AdminLogin() {
       <div className="w-full max-w-md bg-card-bg border border-white/5 p-10 rounded-[32px] relative overflow-hidden">
         
         {/* Glow Effect */}
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-yellow/10 blur-[80px]"></div>
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-brand-gold/10 blur-[80px]"></div>
 
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/20 text-brand-yellow mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-gold/10 border border-brand-gold/20 text-brand-gold mb-4">
             <ShieldCheck size={32} />
           </div>
           <h1 className="text-white text-2xl font-black">لوحة التحكم</h1>
@@ -66,7 +66,7 @@ export default function AdminLogin() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl py-4 pr-12 pl-4 text-white focus:border-brand-yellow/50 outline-none transition-all"
+                className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl py-4 pr-12 pl-4 text-white focus:border-brand-gold/50 outline-none transition-all"
                 placeholder="admin@trust.com"
                 required
               />
@@ -81,7 +81,7 @@ export default function AdminLogin() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl py-4 pr-12 pl-4 text-white focus:border-brand-yellow/50 outline-none transition-all"
+                className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl py-4 pr-12 pl-4 text-white focus:border-brand-gold/50 outline-none transition-all"
                 placeholder="••••••••"
                 required
               />
@@ -93,7 +93,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand-yellow hover:bg-yellow-500 text-black font-black py-4 rounded-2xl transition-all shadow-lg shadow-brand-yellow/10 disabled:opacity-50"
+            className="w-full bg-brand-gold hover:bg-brand-gold text-black font-black py-4 rounded-2xl transition-all shadow-lg shadow-brand-gold/10 disabled:opacity-50"
           >
             {loading ? "جاري التحقق..." : "دخول المنطقة الآمنة"}
           </button>

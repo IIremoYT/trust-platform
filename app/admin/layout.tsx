@@ -132,8 +132,8 @@ export default function AdminLayout({
           className="
             w-14 h-14
             border-4
-            border-yellow-500/20
-            border-t-yellow-500
+            border-brand-gold/20
+            border-t-brand-gold
             rounded-full
             animate-spin
           "
@@ -264,7 +264,7 @@ export default function AdminLayout({
               className="
                 w-11 h-11
 
-                bg-gradient-to-br from-brand-yellow to-yellow-600
+                bg-gradient-to-br from-brand-gold to-brand-gold
 
                 rounded-2xl
 
@@ -275,7 +275,7 @@ export default function AdminLayout({
                 text-lg
 
                 shadow-[0_0_20px_rgba(212,175,55,0.4)]
-                border border-brand-yellow/30
+                border border-brand-gold/30
               "
             >
               T
@@ -295,7 +295,7 @@ export default function AdminLayout({
               <p
                 className="
                   text-[10px]
-                  text-brand-yellow/70
+                  text-brand-gold/70
                   tracking-[0.2em]
                   font-bold
                 "
@@ -333,6 +333,7 @@ export default function AdminLayout({
                   setMobileMenuOpen(false)
                 }
                 className={`
+                  relative
                   flex
                   items-center
                   gap-3
@@ -344,18 +345,16 @@ export default function AdminLayout({
                   transition-all duration-300
 
                   group
+                  overflow-hidden
 
                   ${
                     active
                       ? `
                         bg-gradient-to-l
-                        from-brand-yellow/20
+                        from-brand-gold/20
                         to-transparent
 
-                        border-r-4
-                        border-brand-yellow
-
-                        text-brand-yellow
+                        text-brand-gold
                       `
                       : `
                         hover:bg-white/10
@@ -364,11 +363,14 @@ export default function AdminLayout({
                   }
                 `}
               >
+                {active && (
+                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-brand-gold rounded-r-2xl" />
+                )}
                 <span
                   className={`
                     ${
                       active
-                        ? "text-brand-yellow"
+                        ? "text-brand-gold"
                         : `
                           text-gray-500
                           group-hover:text-white

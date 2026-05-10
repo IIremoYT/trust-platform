@@ -176,7 +176,7 @@ export default function DashboardHome() {
       sub: "إجمالي الزيارات",
       icon: <Users size={24} />,
       color:
-        "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+        "bg-brand-gold/10 text-brand-gold border-brand-gold/20",
     },
   ];
 
@@ -205,10 +205,10 @@ export default function DashboardHome() {
 
               mb-4
 
-              text-brand-yellow
+              text-brand-gold
 
-              bg-brand-yellow/10
-              border border-brand-yellow/20
+              bg-brand-gold/10
+              border border-brand-gold/20
 
               px-5 py-2
               rounded-full
@@ -240,8 +240,8 @@ export default function DashboardHome() {
         <Link
           href="/admin/proofs"
           className="
-            bg-brand-yellow
-            hover:bg-yellow-500
+            bg-brand-gold
+            hover:bg-brand-gold
 
             text-black
             font-bold
@@ -283,7 +283,7 @@ export default function DashboardHome() {
                 p-6
 
                 hover:border-white/20
-                hover:shadow-2xl hover:shadow-brand-yellow/5
+                hover:shadow-2xl hover:shadow-brand-gold/5
 
                 transition-all duration-300
               "
@@ -396,8 +396,8 @@ export default function DashboardHome() {
               <Link
                 href="/admin/proofs"
                 className="
-                  text-brand-yellow
-                  hover:text-yellow-500
+                  text-brand-gold
+                  hover:text-brand-gold
 
                   text-sm
                   font-bold
@@ -420,7 +420,7 @@ export default function DashboardHome() {
                 <Loader2
                   className="
                     animate-spin
-                    text-yellow-500
+                    text-brand-gold
                   "
                 />
               </div>
