@@ -16,7 +16,9 @@ if (!admin.apps.length) {
       }
     } else {
       // Local development fallback using fs to avoid Webpack bundling errors on Vercel
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const fs = require('fs');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const path = require('path');
       const serviceAccountPath = path.join(process.cwd(), 'serviceAccountKey.json');
       
