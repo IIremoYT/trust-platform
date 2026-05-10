@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import { cookies } from "next/headers";
+import { adminAuth } from "@/lib/firebaseAdmin";
+
+// Simple in-memory rate limit Map (IP -> Timestamp)
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 
 // Cloudinary Config
 cloudinary.config({
@@ -10,19 +15,70 @@ cloudinary.config({
 
 export async function POST(req: Request) {
   try {
+    // 1. Admin Authorization Check
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("__session")?.value;
+
+    if (!sessionCookie) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
+
+    try {
+      await adminAuth.verifySessionCookie(sessionCookie, true);
+    } catch (authError) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+    }
+
+    // 2. Rate Limiting (Admin specific, max 20 uploads per minute)
+    const ip = req.headers.get("x-forwarded-for") || "unknown-admin";
+    const now = Date.now();
+    const rateLimitData = rateLimitMap.get(ip) || { count: 0, lastReset: now };
+
+    if (now - rateLimitData.lastReset > 60000) {
+      rateLimitData.count = 1;
+      rateLimitData.lastReset = now;
+    } else {
+      rateLimitData.count += 1;
+    }
+    
+    rateLimitMap.set(ip, rateLimitData);
+
+    if (rateLimitData.count > 20) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
     const { image } = await req.json();
 
-    if (!image) {
+    if (!image || typeof image !== "string") {
       return NextResponse.json(
         { error: "No image provided" },
         { status: 400 }
       );
     }
 
-    // Upload with security optimizations:
-    // - format: webp — auto convert to WebP
-    // - quality: auto:good — optimize size while preserving quality
-    // - flags: strip_profile — remove EXIF metadata
+    // 3. MIME Type Validation
+    const match = image.match(/^data:([A-Za-z-+\/]+);base64,/);
+    if (!match) {
+      return NextResponse.json({ error: "Invalid image format" }, { status: 400 });
+    }
+    
+    const mimeType = match[1];
+    const allowedMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedMimes.includes(mimeType)) {
+      return NextResponse.json({ error: "Unsupported file type. Only JPEG, PNG, WEBP, GIF allowed." }, { status: 400 });
+    }
+
+    // 4. File Size Validation (Approx Base64 size)
+    // Formula: length * 3/4 - padding
+    const base64Length = image.length - match[0].length;
+    const sizeInBytes = (base64Length * 3) / 4;
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+
+    if (sizeInBytes > maxSize) {
+      return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 400 });
+    }
+
+    // 5. Upload with security optimizations (EXIF Strip & WebP Conversion)
     const uploadResponse = await cloudinary.uploader.upload(image, {
       folder: "proofs",
       format: "webp",

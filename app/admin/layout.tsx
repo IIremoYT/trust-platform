@@ -48,29 +48,15 @@ export default function AdminLayout({
     useState(false);
 
   /* =========================
-     AUTH CHECK
+     AUTH CHECK (Client sync)
   ========================= */
 
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        (user) => {
-          if (
-            !user &&
-            pathname !== "/admin"
-          ) {
-            router.push("/admin");
-          } else {
-            setAuthorized(true);
-          }
-
-          setCheckingAuth(false);
-        }
-      );
-
-    return () => unsubscribe();
-  }, [pathname, router]);
+    // The main protection is now Server-Side Middleware (__session cookie).
+    // This client-side check is just for UI readiness.
+    setAuthorized(pathname !== "/admin");
+    setCheckingAuth(false);
+  }, [pathname]);
 
   /* =========================
      MENU ITEMS
@@ -176,8 +162,13 @@ export default function AdminLayout({
     async () => {
       try {
         await signOut(auth);
+        
+        // Clear server session cookie
+        await fetch("/api/auth/logout", {
+          method: "POST"
+        });
 
-        router.push("/admin");
+        window.location.href = "/admin";
 
       } catch (error) {
         console.error(error);

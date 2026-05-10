@@ -5,8 +5,6 @@ import { useEffect, useState, useRef } from "react";
 import {
   collection,
   getDocs,
-  addDoc,
-  serverTimestamp,
 } from "firebase/firestore";
 
 import {
@@ -120,18 +118,28 @@ export default function ReviewsPage() {
       return;
     }
 
+    let loadingId: string | number | undefined;
+
     try {
       setSending(true);
 
-      const loadingId = trustToast.loading("جاري إرسال تقييمك...");
+      loadingId = trustToast.loading("جاري إرسال تقييمك...");
 
-      await addDoc(collection(db, "reviews"), {
-        name: name.trim(),
-        comment: comment.trim(),
-        rating,
-        active: false,
-        createdAt: serverTimestamp(),
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, comment, rating, honeypot }),
       });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error("انتظر قليلاً قبل الإرسال مرة أخرى.");
+        }
+        if (response.status === 403) {
+          throw new Error("محتوى غير مسموح.");
+        }
+        throw new Error("فشل الإرسال.");
+      }
 
       trustToast.dismiss(loadingId);
       trustToast.success("تم إرسال تقييمك بنجاح ✨", "سيتم مراجعته ونشره قريباً");
@@ -141,9 +149,10 @@ export default function ReviewsPage() {
       setRating(5);
       setLastSubmit(Date.now());
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      trustToast.error("حدث خطأ", "يرجى المحاولة مرة أخرى");
+      if (loadingId) trustToast.dismiss(loadingId);
+      trustToast.error("حدث خطأ", error.message || "يرجى المحاولة مرة أخرى");
     } finally {
       setSending(false);
     }

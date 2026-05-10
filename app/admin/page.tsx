@@ -19,10 +19,25 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // لو الدخول نجح، وديه على صفحة المراجعات كبداية
-      router.push("/admin/dashboard");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await userCredential.user.getIdToken();
+
+      const response = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (response.ok) {
+        // Force a hard refresh to let the middleware detect the cookie
+        window.location.href = "/admin/dashboard";
+      } else {
+        throw new Error("Failed to create session");
+      }
     } catch (err: any) {
+      console.error(err);
       setError("بيانات الدخول غير صحيحة يا يوسف، راجع الإيميل والباسورد.");
     } finally {
       setLoading(false);
