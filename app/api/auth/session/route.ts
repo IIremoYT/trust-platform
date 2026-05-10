@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: Request) {
   try {
@@ -23,9 +24,13 @@ export async function POST(req: Request) {
       sameSite: "lax",
     });
 
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    logger.security("Admin successfully logged in and session created", { ip });
+
     return NextResponse.json({ status: "success" });
   } catch (error) {
-    console.error("Session Cookie Error:", error);
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    logger.security("Failed Admin Login Attempt", { ip, error });
     return NextResponse.json(
       { error: "Unauthorized request!" },
       { status: 401 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import * as admin from "firebase-admin";
+import { logger } from "@/lib/logger";
 
 // Simple in-memory rate limit Map (IP -> Timestamp)
 // Note: In Vercel Edge/Serverless this resets on cold boots, but it's sufficient for basic spam deterrence.
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
     const now = Date.now();
     const lastSubmit = rateLimitMap.get(ip) || 0;
     if (now - lastSubmit < 60000) {
+      logger.warn("Rate limit exceeded for reviews API", { ip });
       return NextResponse.json(
         { error: "Rate limit exceeded. Please wait before submitting again." },
         { status: 429 }
@@ -39,6 +41,7 @@ export async function POST(req: Request) {
 
     // Honeypot check
     if (honeypot) {
+      logger.security("Honeypot triggered", { ip, name });
       // Act like it succeeded to fool bots
       return NextResponse.json({ success: true, fake: true });
     }
@@ -58,7 +61,7 @@ export async function POST(req: Request) {
     
     // Score < 0.5 is considered a bot
     if (!verifyData.success || verifyData.score < 0.5) {
-      console.warn("Bot detected by reCAPTCHA:", verifyData);
+      logger.security("Bot detected by reCAPTCHA v3", { ip, score: verifyData.score, name });
       return NextResponse.json({ error: "Bot detected. Request blocked." }, { status: 403 });
     }
 
@@ -70,7 +73,7 @@ export async function POST(req: Request) {
     }
 
     if (containsSpam(name) || containsSpam(comment)) {
-      // Act like it succeeded to fool bots or return error
+      logger.security("Spam keyword detected", { ip, name, comment });
       return NextResponse.json(
         { error: "Spam detected" },
         { status: 403 }
@@ -89,9 +92,11 @@ export async function POST(req: Request) {
     // Update rate limit
     rateLimitMap.set(ip, now);
 
+    logger.info("New review submitted successfully", { ip, name, rating });
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Reviews API Error:", error);
+    logger.error("Reviews API Exception", error, { ip: req.headers.get("x-forwarded-for") });
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

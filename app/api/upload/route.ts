@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { cookies } from "next/headers";
 import { adminAuth } from "@/lib/firebaseAdmin";
+import { logger } from "@/lib/logger";
 
 // Simple in-memory rate limit Map (IP -> Timestamp)
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
@@ -18,19 +19,21 @@ export async function POST(req: Request) {
     // 1. Admin Authorization Check
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("__session")?.value;
+    const ip = req.headers.get("x-forwarded-for") || "unknown-admin";
 
     if (!sessionCookie) {
+      logger.security("Upload attempt without session cookie", { ip });
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     try {
       await adminAuth.verifySessionCookie(sessionCookie, true);
     } catch (authError) {
+      logger.security("Upload attempt with invalid session cookie", { ip });
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
     // 2. Rate Limiting (Admin specific, max 20 uploads per minute)
-    const ip = req.headers.get("x-forwarded-for") || "unknown-admin";
     const now = Date.now();
     const rateLimitData = rateLimitMap.get(ip) || { count: 0, lastReset: now };
 
@@ -44,6 +47,7 @@ export async function POST(req: Request) {
     rateLimitMap.set(ip, rateLimitData);
 
     if (rateLimitData.count > 20) {
+      logger.warn("Admin upload rate limit exceeded", { ip });
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
@@ -93,13 +97,15 @@ export async function POST(req: Request) {
       ],
     });
 
+    logger.info("Image uploaded successfully by Admin", { ip, url: uploadResponse.secure_url });
+
     return NextResponse.json({
       success: true,
       url: uploadResponse.secure_url,
     });
 
   } catch (error: unknown) {
-    console.error("Cloudinary Upload Error:", error);
+    logger.error("Cloudinary Upload Exception", error);
 
     const message =
       error instanceof Error ? error.message : "Internal Server Error";
