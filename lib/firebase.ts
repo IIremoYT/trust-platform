@@ -2,7 +2,6 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBJ3chCeVgkKANkJLRVBZPrY_q3qvkLuSA",
@@ -16,19 +15,10 @@ const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize App Check only in production on the client side
-if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
-  if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-    try {
-      initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
-        isTokenAutoRefreshEnabled: true
-      });
-    } catch (e) {
-      console.warn("App Check initialization failed", e);
-    }
-  }
-}
+// NOTE: App Check is disabled because the reCAPTCHA site key is not
+// registered as an App Check provider in the Firebase Console.
+// The platform is already secured via server-side session cookies,
+// Firestore rules, and API-level authentication checks.
 
 export const db = getFirestore(app);
 export const storage = getStorage(app);
