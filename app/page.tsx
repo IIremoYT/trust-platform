@@ -21,15 +21,24 @@ export default function Home() {
         <Stats />
       </div>
 
+      {/* Section Divider */}
+      <div className="section-fade-divider" />
+
       {/* Payments */}
       <div id="payments">
         <Payments />
       </div>
 
+      {/* Section Divider */}
+      <div className="section-fade-divider" />
+
       {/* Proofs */}
       <div id="proofs">
         <Proofs />
       </div>
+
+      {/* Section Divider */}
+      <div className="section-fade-divider" />
 
       {/* Reviews */}
       <div id="reviews">
@@ -50,7 +59,7 @@ export default function Home() {
         <div
           className="
             absolute inset-0
-            bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.08),transparent_60%)]
+            bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.06),transparent_60%)]
             pointer-events-none
           "
         ></div>
@@ -64,9 +73,9 @@ export default function Home() {
           <div
             className="
               bg-[#0B0B0B]
-              border border-zinc-800
+              border border-white/5
 
-              rounded-[40px]
+              rounded-[2rem]
 
               p-10 md:p-16
 
@@ -74,6 +83,8 @@ export default function Home() {
               items-center justify-between
 
               gap-12
+
+              shadow-[0_4px_24px_rgba(0,0,0,0.4)]
             "
           >
             {/* Left */}
@@ -85,16 +96,17 @@ export default function Home() {
 
                   mb-5
 
-                  text-yellow-500
+                  text-[#D4AF37]
 
-                  bg-yellow-500/10
-                  border border-yellow-500/20
+                  bg-[#D4AF37]/10
+                  border border-[#D4AF37]/20
 
                   px-5 py-2
 
                   rounded-full
 
                   text-sm font-semibold
+                  label-luxury
                 "
               >
                 CONTACT US
@@ -121,6 +133,7 @@ export default function Home() {
                   text-zinc-400
                   text-lg
                   leading-9
+                  text-editorial
                 "
               >
                 نحن متاحون دائماً للرد على جميع استفساراتك
@@ -144,15 +157,15 @@ export default function Home() {
                 className="
                   group
 
-                  bg-[#111]
-                  hover:bg-[#171717]
+                  bg-[#0D0D0D]
+                  hover:bg-[#111]
 
-                  border border-green-500/20
-                  hover:border-green-500/40
+                  border border-emerald-500/15
+                  hover:border-emerald-500/30
 
                   px-8 py-5
 
-                  rounded-3xl
+                  rounded-[2rem]
 
                   flex items-center gap-4
 
@@ -161,6 +174,7 @@ export default function Home() {
                   min-w-[240px]
 
                   hover:-translate-y-1
+                  touch-feedback
                 "
               >
                 <div
@@ -169,11 +183,11 @@ export default function Home() {
 
                     rounded-2xl
 
-                    bg-green-500/10
+                    bg-emerald-500/10
 
                     flex items-center justify-center
 
-                    text-green-500
+                    text-emerald-500
 
                     group-hover:scale-110
 
@@ -202,15 +216,15 @@ export default function Home() {
                 className="
                   group
 
-                  bg-[#111]
-                  hover:bg-[#171717]
+                  bg-[#0D0D0D]
+                  hover:bg-[#111]
 
-                  border border-blue-500/20
-                  hover:border-blue-500/40
+                  border border-blue-500/15
+                  hover:border-blue-500/30
 
                   px-8 py-5
 
-                  rounded-3xl
+                  rounded-[2rem]
 
                   flex items-center gap-4
 
@@ -219,6 +233,7 @@ export default function Home() {
                   min-w-[240px]
 
                   hover:-translate-y-1
+                  touch-feedback
                 "
               >
                 <div
@@ -256,10 +271,12 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Footer Divider */}
+      <div className="footer-gradient-divider" />
+
       {/* Footer */}
       <footer
         className="
-          border-t border-zinc-900
           py-10 px-6
         "
       >
@@ -282,12 +299,12 @@ export default function Home() {
 
                 rounded-2xl
 
-                bg-yellow-500/10
-                border border-yellow-500/20
+                bg-[#D4AF37]/10
+                border border-[#D4AF37]/15
 
                 flex items-center justify-center
 
-                text-yellow-500
+                text-[#D4AF37]
                 font-black
               "
             >

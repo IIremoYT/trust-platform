@@ -26,6 +26,20 @@ interface Review {
   active: boolean;
 }
 
+// Generate a consistent avatar gradient from name
+function getAvatarGradient(name: string): string {
+  const gradients = [
+    "from-amber-500/20 to-orange-600/10",
+    "from-emerald-500/20 to-teal-600/10",
+    "from-violet-500/20 to-purple-600/10",
+    "from-rose-500/20 to-pink-600/10",
+    "from-cyan-500/20 to-blue-600/10",
+    "from-lime-500/20 to-green-600/10",
+  ];
+  const index = name.charCodeAt(0) % gradients.length;
+  return gradients[index];
+}
+
 // Animated review card
 function ReviewCard({
   review,
@@ -39,6 +53,8 @@ function ReviewCard({
     once: true,
     margin: "-50px",
   });
+
+  const avatarGradient = getAvatarGradient(review.name);
 
   return (
     <motion.div
@@ -58,37 +74,43 @@ function ReviewCard({
         group
         relative
         overflow-hidden
-        rounded-[32px]
-        border border-zinc-800
+        rounded-[2rem]
+        border border-white/5
         bg-[#0B0B0B]
         p-8
-        hover:border-yellow-500/30
+        hover:border-[#D4AF37]/15
         hover:-translate-y-2
         transition-all duration-500
+        touch-feedback-soft
+        shadow-[0_4px_24px_rgba(0,0,0,0.4)]
+        hover:shadow-[0_8px_40px_rgba(0,0,0,0.5),0_0_30px_rgba(212,175,55,0.06)]
       "
     >
+      {/* Decorative Quote */}
+      <span className="review-quote-mark">&ldquo;</span>
+
       {/* Glow */}
       <div
         className="
           absolute top-0 right-0
           w-40 h-40
-          bg-yellow-500/5
+          bg-[#D4AF37]/4
           blur-3xl
         "
       ></div>
 
       {/* Top */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="relative z-10 flex items-center justify-between mb-6">
 
         {/* Stars */}
         <div className="flex items-center gap-1">
           {[...Array(review.rating)].map((_, index) => (
             <Star
               key={index}
-              size={18}
+              size={16}
               className="
-                fill-yellow-500
-                text-yellow-500
+                fill-[#D4AF37]
+                text-[#D4AF37]
               "
             />
           ))}
@@ -98,10 +120,10 @@ function ReviewCard({
         <div
           className="
             flex items-center gap-1
-            text-green-400
+            text-emerald-400
             text-xs
-            bg-green-500/10
-            border border-green-500/20
+            bg-emerald-500/8
+            border border-emerald-500/15
             px-3 py-1
             rounded-full
           "
@@ -115,30 +137,32 @@ function ReviewCard({
       {/* Comment */}
       <p
         className="
+          relative z-10
           text-zinc-300
-          text-lg
-          leading-9
-          mb-10
+          text-base
+          leading-8
+          mb-8
+          text-editorial
         "
       >
         &ldquo;{review.comment}&rdquo;
       </p>
 
       {/* User */}
-      <div className="flex items-center gap-4">
+      <div className="relative z-10 flex items-center gap-4">
 
-        {/* Avatar */}
+        {/* Avatar with gradient */}
         <div
-          className="
-            w-14 h-14
-            rounded-2xl
-            bg-yellow-500/10
-            border border-yellow-500/20
+          className={`
+            w-12 h-12
+            rounded-xl
+            bg-gradient-to-br ${avatarGradient}
+            border border-white/5
             flex items-center justify-center
-            text-yellow-500
-            font-black
-            text-lg
-          "
+            text-white/80
+            font-bold
+            text-base
+          `}
         >
           {review.name.charAt(0)}
         </div>
@@ -149,14 +173,14 @@ function ReviewCard({
             className="
               text-white
               font-bold
-              text-lg
+              text-base
             "
           >
             {review.name}
           </h3>
 
-          <p className="text-zinc-500 text-sm">
-            عميل حقيقي
+          <p className="text-zinc-500 text-xs mt-0.5">
+            عميل موثق
           </p>
         </div>
 
@@ -229,7 +253,7 @@ export default function Reviews() {
       <div
         className="
           absolute inset-0
-          bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.05),transparent_60%)]
+          bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.04),transparent_60%)]
           pointer-events-none
         "
       ></div>
@@ -255,12 +279,13 @@ export default function Reviews() {
               className="
                 inline-flex items-center gap-2
                 mb-4
-                text-yellow-500
-                bg-yellow-500/10
-                border border-yellow-500/20
+                text-[#D4AF37]
+                bg-[#D4AF37]/10
+                border border-[#D4AF37]/20
                 px-5 py-2
                 rounded-full
                 text-sm font-semibold
+                label-luxury
               "
             >
               <ShieldCheck size={16} />
@@ -290,10 +315,10 @@ export default function Reviews() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    size={18}
+                    size={16}
                     className="
-                      fill-yellow-500
-                      text-yellow-500
+                      fill-[#D4AF37]
+                      text-[#D4AF37]
                     "
                   />
                 ))}
@@ -312,8 +337,8 @@ export default function Reviews() {
             className="
               hidden md:flex
               items-center gap-2
-              text-yellow-500
-              hover:text-yellow-400
+              text-[#D4AF37]
+              hover:text-[#E8D48B]
               transition-all duration-300
             "
           >
@@ -335,10 +360,9 @@ export default function Reviews() {
                 key={item}
                 className="
                   h-[280px]
-                  rounded-[32px]
-                  bg-zinc-900
-                  border border-zinc-800
-                  animate-pulse
+                  rounded-[2rem]
+                  shimmer-skeleton
+                  border border-white/5
                 "
               ></div>
             ))}
@@ -378,8 +402,8 @@ export default function Reviews() {
                   className="
                     inline-flex items-center justify-center
 
-                    bg-yellow-500
-                    hover:bg-yellow-400
+                    bg-[#D4AF37]
+                    hover:bg-[#E8D48B]
 
                     text-black
                     font-bold
@@ -390,9 +414,10 @@ export default function Reviews() {
 
                     transition-all duration-300
 
-                    shadow-[0_0_40px_rgba(250,204,21,0.25)]
+                    shadow-[0_0_40px_rgba(212,175,55,0.2)]
 
                     hover:scale-105
+                    touch-feedback
                   "
                 >
                   مشاهدة جميع التقييمات

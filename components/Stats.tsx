@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef } from "react";
 import {
   Users,
   ShoppingCart,
@@ -5,32 +8,40 @@ import {
   Clock3,
 } from "lucide-react";
 
+import { motion, useInView } from "framer-motion";
+
 export default function StatsSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, {
+    once: true,
+    margin: "-40px",
+  });
+
   const stats = [
     {
-      icon: <Users size={30} />,
+      icon: <Users size={28} />,
       number: "+1,250",
       label: "عميل سعيد",
     },
     {
-      icon: <ShoppingCart size={30} />,
+      icon: <ShoppingCart size={28} />,
       number: "+3,500",
       label: "عملية ناجحة",
     },
     {
-      icon: <ShieldCheck size={30} />,
+      icon: <ShieldCheck size={28} />,
       number: "99%",
       label: "نسبة رضا العملاء",
     },
     {
-      icon: <Clock3 size={30} />,
+      icon: <Clock3 size={28} />,
       number: "24/7",
       label: "دعم فني متاح",
     },
   ];
 
   return (
-    <section dir="rtl" className="px-6 -mt-8 relative z-20">
+    <section dir="rtl" className="px-6 -mt-8 relative z-20" ref={sectionRef}>
       <div
         className="
           max-w-7xl mx-auto
@@ -39,17 +50,31 @@ export default function StatsSection() {
         "
       >
         {stats.map((item, index) => (
-          <div
+          <motion.div
             key={index}
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={
+              isInView
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 30, scale: 0.95 }
+            }
+            transition={{
+              duration: 0.6,
+              delay: index * 0.1,
+              ease: [0.16, 1, 0.3, 1],
+            }}
             className="
               bg-[#0B0B0B]
-              border border-zinc-800
-              rounded-3xl
+              border border-white/5
+              rounded-[2rem]
               px-8 py-8
               flex items-center justify-between
-              hover:border-yellow-500/40
-              transition-all duration-300
+              hover:border-[#D4AF37]/15
+              transition-all duration-500
               group
+              touch-feedback-soft
+              shadow-[0_4px_24px_rgba(0,0,0,0.4)]
+              hover:shadow-[0_8px_40px_rgba(0,0,0,0.5),0_0_30px_rgba(212,175,55,0.06)]
             "
           >
             {/* Text */}
@@ -78,19 +103,19 @@ export default function StatsSection() {
             {/* Icon */}
             <div
               className="
-                text-yellow-500
-                bg-yellow-500/10
-                border border-yellow-500/20
+                text-[#D4AF37]
+                bg-[#D4AF37]/10
+                border border-[#D4AF37]/15
                 p-4
                 rounded-2xl
-                shadow-[0_0_25px_rgba(250,204,21,0.08)]
+                shadow-[0_0_25px_rgba(212,175,55,0.06)]
                 group-hover:scale-110
                 transition-all duration-300
               "
             >
               {item.icon}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

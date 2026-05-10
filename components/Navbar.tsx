@@ -40,7 +40,7 @@ export default function Navbar() {
     { name: "تواصل معنا", href: "#contact" },
   ];
 
-  // Drawer animation variants
+  // Drawer animation variants — premium spring
   const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
@@ -57,8 +57,8 @@ export default function Navbar() {
       opacity: 1,
       transition: {
         type: "spring",
-        damping: 30,
-        stiffness: 300,
+        damping: 32,
+        stiffness: 280,
         mass: 0.8,
         when: "beforeChildren",
         staggerChildren: 0.06,
@@ -69,7 +69,7 @@ export default function Navbar() {
       opacity: 0,
       transition: {
         type: "spring",
-        damping: 35,
+        damping: 36,
         stiffness: 400,
         when: "afterChildren",
         staggerChildren: 0.03,
@@ -90,7 +90,7 @@ export default function Navbar() {
       scale: 1,
       transition: {
         type: "spring",
-        damping: 20,
+        damping: 22,
         stiffness: 250,
       },
     },
@@ -115,7 +115,7 @@ export default function Navbar() {
       transition: {
         delay: 0.1,
         type: "spring",
-        damping: 20,
+        damping: 22,
         stiffness: 200,
       },
     },
@@ -161,8 +161,8 @@ export default function Navbar() {
                 relative
                 w-11 h-11
                 rounded-2xl
-                bg-yellow-500/10
-                border border-yellow-500/20
+                bg-[#D4AF37]/10
+                border border-[#D4AF37]/20
                 flex items-center justify-center
                 overflow-hidden
               "
@@ -170,7 +170,7 @@ export default function Navbar() {
               <div
                 className="
                   absolute inset-0
-                  bg-yellow-500/10
+                  bg-[#D4AF37]/10
                   blur-xl
                 "
               />
@@ -179,7 +179,7 @@ export default function Navbar() {
                 size={22}
                 className="
                   relative
-                  text-yellow-500
+                  text-[#D4AF37]
                   group-hover:scale-110
                   transition-all duration-300
                 "
@@ -234,7 +234,7 @@ export default function Navbar() {
                     after:-bottom-2
                     after:h-[2px]
                     after:w-0
-                    after:bg-yellow-500
+                    after:bg-[#D4AF37]
                     after:transition-all
                     after:duration-300
 
@@ -260,8 +260,8 @@ export default function Navbar() {
                 hidden md:flex
                 items-center justify-center
 
-                bg-yellow-500
-                hover:bg-yellow-400
+                bg-[#D4AF37]
+                hover:bg-[#E8D48B]
 
                 text-black
                 font-bold
@@ -273,7 +273,8 @@ export default function Navbar() {
 
                 transition-all duration-300
 
-                shadow-[0_0_30px_rgba(250,204,21,0.18)]
+                shadow-[0_0_30px_rgba(212,175,55,0.15)]
+                btn-shimmer
               "
             >
               تواصل الآن
@@ -333,7 +334,7 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <div className="lg:hidden">
-            {/* Overlay - z-[60] to sit above navbar (z-50) */}
+            {/* Overlay — z-[60] above navbar */}
             <motion.div
               key="drawer-overlay"
               variants={overlayVariants}
@@ -349,7 +350,7 @@ export default function Navbar() {
               "
             />
 
-            {/* Drawer Panel - z-[70] above overlay */}
+            {/* Drawer Panel — z-[70] above overlay */}
             <motion.div
               key="drawer-panel"
               dir="rtl"
@@ -392,14 +393,14 @@ export default function Navbar() {
                     className="
                       w-10 h-10
                       rounded-xl
-                      bg-yellow-500/10
-                      border border-yellow-500/20
+                      bg-[#D4AF37]/10
+                      border border-[#D4AF37]/20
                       flex items-center justify-center
                     "
                   >
                     <ShieldCheck
                       size={18}
-                      className="text-yellow-500"
+                      className="text-[#D4AF37]"
                     />
                   </div>
                   <div className="flex flex-col leading-none">
@@ -463,9 +464,9 @@ export default function Navbar() {
                             text-[15px]
                             font-medium
 
-                            hover:bg-yellow-500/[0.07]
-                            hover:text-yellow-500
-                            hover:border-yellow-500/20
+                            hover:bg-[#D4AF37]/[0.07]
+                            hover:text-[#D4AF37]
+                            hover:border-[#D4AF37]/20
 
                             active:scale-[0.98]
 
@@ -499,16 +500,17 @@ export default function Navbar() {
                   className="
                     flex items-center justify-center
                     w-full
-                    bg-yellow-500
-                    hover:bg-yellow-400
+                    bg-[#D4AF37]
+                    hover:bg-[#E8D48B]
                     text-black
                     font-bold
                     text-sm
                     py-4
                     rounded-2xl
                     transition-all duration-300
-                    shadow-[0_0_40px_rgba(250,204,21,0.2)]
+                    shadow-[0_0_40px_rgba(212,175,55,0.15)]
                     active:scale-[0.97]
+                    btn-shimmer
                   "
                 >
                   تواصل الآن

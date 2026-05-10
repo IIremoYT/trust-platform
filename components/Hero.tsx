@@ -7,11 +7,11 @@ export default function HeroSection() {
       dir="rtl"
       className="
         relative overflow-hidden
-        border-b border-zinc-900
+        border-b border-white/5
         bg-[#050505]
         before:absolute
         before:inset-0
-        before:bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.08),transparent_60%)]
+        before:bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.06),transparent_60%)]
         before:pointer-events-none
       "
     >
@@ -28,12 +28,13 @@ export default function HeroSection() {
                 inline-flex items-center
                 mb-6
                 text-sm
-                text-yellow-500
-                border border-yellow-500/20
-                bg-yellow-500/10
+                text-[#D4AF37]
+                border border-[#D4AF37]/20
+                bg-[#D4AF37]/10
                 px-5 py-2
                 rounded-full
                 backdrop-blur-md
+                label-luxury
               "
             >
               TRUST PLATFORM
@@ -53,7 +54,7 @@ export default function HeroSection() {
               الثقة هي أساسنا
               <br />
               والأدلة هي{" "}
-              <span className="text-yellow-500">
+              <span className="text-[#D4AF37]">
                 برهاننا
               </span>
             </h1>
@@ -67,6 +68,7 @@ export default function HeroSection() {
                 mb-10
                 max-w-2xl
                 mx-auto lg:mx-0
+                text-editorial
               "
             >
               نقدم أفضل الخدمات بأعلى جودة وأسعار مناسبة
@@ -86,15 +88,17 @@ export default function HeroSection() {
               <a
                 href="#contact"
                 className="
-                  bg-yellow-500
-                  hover:bg-yellow-400
+                  bg-[#D4AF37]
+                  hover:bg-[#E8D48B]
                   transition-all duration-300
                   text-black
                   font-bold
                   px-10 py-4
                   rounded-2xl
-                  shadow-[0_0_40px_rgba(250,204,21,0.25)]
+                  shadow-[0_0_40px_rgba(212,175,55,0.2)]
                   hover:scale-[1.03]
+                  touch-feedback
+                  btn-shimmer
                 "
               >
                 تواصل عبر واتساب
@@ -105,14 +109,15 @@ export default function HeroSection() {
                 href="#proofs"
                 className="
                   border border-zinc-700
-                  hover:border-yellow-500
-                  hover:text-yellow-500
-                  hover:bg-yellow-500/5
+                  hover:border-[#D4AF37]
+                  hover:text-[#D4AF37]
+                  hover:bg-[#D4AF37]/5
                   transition-all duration-300
                   text-white
                   px-10 py-4
                   rounded-2xl
                   backdrop-blur-sm
+                  touch-feedback
                 "
               >
                 عرض الإثباتات
@@ -130,7 +135,7 @@ export default function HeroSection() {
               <div
                 className="
                   absolute inset-0
-                  bg-yellow-500/10
+                  bg-[#D4AF37]/8
                   blur-2xl
                   rounded-full
                   scale-125
@@ -142,7 +147,7 @@ export default function HeroSection() {
                 className="
                   absolute inset-0
                   rounded-full
-                  border border-yellow-500/10
+                  border border-[#D4AF37]/8
                   scale-110
                 "
               ></div>
@@ -155,7 +160,7 @@ export default function HeroSection() {
                   relative
                   w-[420px] md:w-[620px]
                   object-contain
-                  drop-shadow-[0_0_50px_rgba(250,204,21,0.35)]
+                  drop-shadow-[0_0_50px_rgba(212,175,55,0.25)]
                   hover:scale-[1.02]
                   transition-all duration-500
                 "

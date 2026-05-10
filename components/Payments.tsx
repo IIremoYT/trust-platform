@@ -15,6 +15,7 @@ import {
 import { motion, useInView } from "framer-motion";
 
 import { db } from "@/lib/firebase";
+import { trustToast } from "./TrustToast";
 
 interface PaymentMethod {
   id: string;
@@ -60,22 +61,27 @@ function PaymentCard({
         group
         relative
         overflow-hidden
-        rounded-[32px]
-        border border-zinc-800
+        rounded-[2rem]
+        border border-white/5
         bg-[#0B0B0B]
         p-7
-        hover:border-yellow-500/30
+        hover:border-[#D4AF37]/15
         hover:-translate-y-2
         transition-all duration-500
+        touch-feedback
+        shadow-[0_4px_24px_rgba(0,0,0,0.4)]
+        hover:shadow-[0_8px_40px_rgba(0,0,0,0.5),0_0_30px_rgba(212,175,55,0.06)]
       "
     >
-      {/* Glow */}
+      {/* Shimmer glow */}
       <div
         className="
           absolute top-0 right-0
           w-32 h-32
-          bg-yellow-500/5
+          bg-[#D4AF37]/5
           blur-3xl
+          group-hover:bg-[#D4AF37]/8
+          transition-all duration-700
         "
       ></div>
 
@@ -91,6 +97,7 @@ function PaymentCard({
         <img
           src={item.image}
           alt={item.name}
+          loading="lazy"
           className="
             max-h-[52px]
             object-contain
@@ -117,7 +124,7 @@ function PaymentCard({
       <div
         className="
           bg-black/50
-          border border-zinc-800
+          border border-white/5
           rounded-2xl
           px-4 py-3
           mb-6
@@ -137,23 +144,25 @@ function PaymentCard({
       </div>
 
       {/* Copy Button */}
-      <button
+      <motion.button
+        whileTap={{ scale: 0.97 }}
         onClick={() =>
           onCopy(item.value, item.id)
         }
         className="
           w-full
-          bg-yellow-500/10
-          hover:bg-yellow-500
-          border border-yellow-500/20
-          hover:border-yellow-500
-          text-yellow-500
+          bg-[#D4AF37]/10
+          hover:bg-[#D4AF37]
+          border border-[#D4AF37]/20
+          hover:border-[#D4AF37]
+          text-[#D4AF37]
           hover:text-black
           font-bold
           py-3
           rounded-2xl
           flex items-center justify-center gap-2
           transition-all duration-300
+          btn-shimmer
         "
       >
         {copiedId === item.id ? (
@@ -167,7 +176,7 @@ function PaymentCard({
             نسخ البيانات
           </>
         )}
-      </button>
+      </motion.button>
 
     </motion.div>
   );
@@ -208,7 +217,7 @@ export default function PaymentMethods() {
     fetchPayments();
   }, []);
 
-  // Copy
+  // Copy with TRUST toast
   const handleCopy = async (
     value: string,
     id: string
@@ -217,6 +226,7 @@ export default function PaymentMethods() {
       await navigator.clipboard.writeText(value);
 
       setCopiedId(id);
+      trustToast.copied();
 
       setTimeout(() => {
         setCopiedId(null);
@@ -224,6 +234,7 @@ export default function PaymentMethods() {
 
     } catch (error) {
       console.error(error);
+      trustToast.error("فشل النسخ", "حاول مرة أخرى");
     }
   };
 
@@ -240,7 +251,7 @@ export default function PaymentMethods() {
       <div
         className="
           absolute inset-0
-          bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.05),transparent_60%)]
+          bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.04),transparent_60%)]
           pointer-events-none
         "
       ></div>
@@ -263,12 +274,13 @@ export default function PaymentMethods() {
             className="
               inline-flex
               mb-5
-              text-yellow-500
-              bg-yellow-500/10
-              border border-yellow-500/20
+              text-[#D4AF37]
+              bg-[#D4AF37]/10
+              border border-[#D4AF37]/20
               px-5 py-2
               rounded-full
               text-sm font-semibold
+              label-luxury
             "
           >
             PAYMENT METHODS
@@ -292,6 +304,7 @@ export default function PaymentMethods() {
               max-w-2xl
               mx-auto
               leading-9
+              text-editorial
             "
           >
             جميع وسائل الدفع المتاحة لدينا لتحويل الأموال بسهولة وأمان.
@@ -311,10 +324,9 @@ export default function PaymentMethods() {
                 key={item}
                 className="
                   h-[250px]
-                  rounded-[32px]
-                  bg-zinc-900
-                  border border-zinc-800
-                  animate-pulse
+                  rounded-[2rem]
+                  shimmer-skeleton
+                  border border-white/5
                 "
               ></div>
             ))}

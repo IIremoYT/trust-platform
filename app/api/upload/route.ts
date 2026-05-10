@@ -19,9 +19,22 @@ export async function POST(req: Request) {
       );
     }
 
-    // رفع الصورة
+    // Upload with security optimizations:
+    // - format: webp — auto convert to WebP
+    // - quality: auto:good — optimize size while preserving quality
+    // - flags: strip_profile — remove EXIF metadata
     const uploadResponse = await cloudinary.uploader.upload(image, {
       folder: "proofs",
+      format: "webp",
+      quality: "auto:good",
+      flags: "strip_profile",
+      transformation: [
+        {
+          quality: "auto:good",
+          fetch_format: "webp",
+          flags: "strip_profile",
+        },
+      ],
     });
 
     return NextResponse.json({
@@ -29,16 +42,15 @@ export async function POST(req: Request) {
       url: uploadResponse.secure_url,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Cloudinary Upload Error:", error);
 
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error";
+
     return NextResponse.json(
-      {
-        error: error.message,
-      },
-      {
-        status: 500,
-      }
+      { error: message },
+      { status: 500 }
     );
   }
 }

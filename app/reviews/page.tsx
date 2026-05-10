@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import {
   collection,
@@ -14,7 +14,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { motion, useInView } from "framer-motion";
+
 import { db } from "@/lib/firebase";
+import { trustToast } from "@/components/TrustToast";
 
 interface Review {
   id: string;
@@ -22,6 +25,32 @@ interface Review {
   comment: string;
   rating: number;
   active: boolean;
+}
+
+// Spam keyword list
+const SPAM_KEYWORDS = [
+  "http://", "https://", "www.", ".com", ".net",
+  "casino", "viagra", "crypto", "bitcoin", "forex",
+  "click here", "free money", "earn money",
+];
+
+function containsSpam(text: string): boolean {
+  const lower = text.toLowerCase();
+  return SPAM_KEYWORDS.some(keyword => lower.includes(keyword));
+}
+
+// Avatar gradient from name
+function getAvatarGradient(name: string): string {
+  const gradients = [
+    "from-amber-500/20 to-orange-600/10",
+    "from-emerald-500/20 to-teal-600/10",
+    "from-violet-500/20 to-purple-600/10",
+    "from-rose-500/20 to-pink-600/10",
+    "from-cyan-500/20 to-blue-600/10",
+    "from-lime-500/20 to-green-600/10",
+  ];
+  const index = name.charCodeAt(0) % gradients.length;
+  return gradients[index];
 }
 
 export default function ReviewsPage() {
@@ -32,9 +61,13 @@ export default function ReviewsPage() {
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
+  const [honeypot, setHoneypot] = useState(""); // Bot trap
 
   const [sending, setSending] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [lastSubmit, setLastSubmit] = useState(0); // Rate limiting
+
+  const formRef = useRef<HTMLDivElement>(null);
+  const formInView = useInView(formRef, { once: true, margin: "-60px" });
 
   // Fetch Reviews
   useEffect(() => {
@@ -66,27 +99,51 @@ export default function ReviewsPage() {
 
   // Submit Review
   const handleSubmit = async () => {
-    if (!name || !comment) return;
+    // Honeypot check
+    if (honeypot) return;
+
+    if (!name.trim() || !comment.trim()) {
+      trustToast.error("بيانات ناقصة", "يرجى ملء جميع الحقول المطلوبة");
+      return;
+    }
+
+    // Rate limiting — 30 seconds between submissions
+    const now = Date.now();
+    if (now - lastSubmit < 30000) {
+      trustToast.error("انتظر قليلاً", "يرجى الانتظار قبل إرسال تقييم آخر");
+      return;
+    }
+
+    // Spam check
+    if (containsSpam(name) || containsSpam(comment)) {
+      trustToast.error("محتوى غير مسموح", "يرجى إزالة الروابط أو المحتوى المشبوه");
+      return;
+    }
 
     try {
       setSending(true);
 
+      const loadingId = trustToast.loading("جاري إرسال تقييمك...");
+
       await addDoc(collection(db, "reviews"), {
-        name,
-        comment,
+        name: name.trim(),
+        comment: comment.trim(),
         rating,
         active: false,
         createdAt: serverTimestamp(),
       });
 
-      setSuccess(true);
+      trustToast.dismiss(loadingId);
+      trustToast.success("تم إرسال تقييمك بنجاح ✨", "سيتم مراجعته ونشره قريباً");
 
       setName("");
       setComment("");
       setRating(5);
+      setLastSubmit(Date.now());
 
     } catch (error) {
       console.error(error);
+      trustToast.error("حدث خطأ", "يرجى المحاولة مرة أخرى");
     } finally {
       setSending(false);
     }
@@ -109,7 +166,7 @@ export default function ReviewsPage() {
           absolute top-0 left-1/2
           -translate-x-1/2
           w-[900px] h-[900px]
-          bg-yellow-500/10
+          bg-[#D4AF37]/8
           blur-[200px]
           rounded-full
           pointer-events-none
@@ -124,13 +181,14 @@ export default function ReviewsPage() {
           <div
             className="
               inline-flex items-center gap-2
-              text-yellow-500
-              bg-yellow-500/10
-              border border-yellow-500/20
+              text-[#D4AF37]
+              bg-[#D4AF37]/10
+              border border-[#D4AF37]/20
               px-5 py-2
               rounded-full
               text-sm font-semibold
               mb-6
+              label-luxury
             "
           >
             <ShieldCheck size={16} />
@@ -156,6 +214,7 @@ export default function ReviewsPage() {
               max-w-2xl
               mx-auto
               leading-9
+              text-editorial
             "
           >
             جميع تقييمات العملاء الحقيقية وتجاربهم معنا.
@@ -176,8 +235,8 @@ export default function ReviewsPage() {
           <a
             href="#add-review"
             className="
-              bg-yellow-500
-              hover:bg-yellow-400
+              bg-[#D4AF37]
+              hover:bg-[#E8D48B]
 
               text-black
               font-bold
@@ -187,7 +246,9 @@ export default function ReviewsPage() {
 
               transition-all duration-300
 
-              shadow-[0_0_30px_rgba(250,204,21,0.2)]
+              shadow-[0_0_30px_rgba(212,175,55,0.15)]
+              touch-feedback
+              btn-shimmer
             "
           >
             اكتب رأيك
@@ -198,9 +259,9 @@ export default function ReviewsPage() {
             href="/"
             className="
               border border-zinc-700
-              hover:border-yellow-500
-              hover:text-yellow-500
-              hover:bg-yellow-500/5
+              hover:border-[#D4AF37]
+              hover:text-[#D4AF37]
+              hover:bg-[#D4AF37]/5
 
               text-white
               font-bold
@@ -209,6 +270,7 @@ export default function ReviewsPage() {
               rounded-2xl
 
               transition-all duration-300
+              touch-feedback
             "
           >
             العودة للرئيسية
@@ -229,10 +291,9 @@ export default function ReviewsPage() {
                 key={item}
                 className="
                   h-[280px]
-                  rounded-[32px]
-                  bg-zinc-900
-                  border border-zinc-800
-                  animate-pulse
+                  rounded-[2rem]
+                  shimmer-skeleton
+                  border border-white/5
                 "
               ></div>
             ))}
@@ -246,118 +307,122 @@ export default function ReviewsPage() {
                 gap-6
               "
             >
-              {reviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="
-                    group
-                    relative
-                    overflow-hidden
-                    rounded-[32px]
-                    border border-zinc-800
-                    bg-[#0B0B0B]
-                    p-8
-                    hover:border-yellow-500/30
-                    hover:-translate-y-2
-                    transition-all duration-500
-                  "
-                >
-                  {/* Glow */}
-                  <div
+              {reviews.map((review) => {
+                const avatarGradient = getAvatarGradient(review.name);
+                return (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     className="
-                      absolute top-0 right-0
-                      w-40 h-40
-                      bg-yellow-500/5
-                      blur-3xl
-                    "
-                  ></div>
-
-                  {/* Top */}
-                  <div className="flex items-center justify-between mb-6">
-
-                    {/* Stars */}
-                    <div className="flex items-center gap-1">
-                      {[...Array(review.rating)].map((_, index) => (
-                        <Star
-                          key={index}
-                          size={18}
-                          className="
-                            fill-yellow-500
-                            text-yellow-500
-                          "
-                        />
-                      ))}
-                    </div>
-
-                    {/* Verified */}
-                    <div
-                      className="
-                        flex items-center gap-1
-                        text-green-400
-                        text-xs
-                        bg-green-500/10
-                        border border-green-500/20
-                        px-3 py-1
-                        rounded-full
-                      "
-                    >
-                      <ShieldCheck size={12} />
-                      موثق
-                    </div>
-
-                  </div>
-
-                  {/* Comment */}
-                  <p
-                    className="
-                      text-zinc-300
-                      text-lg
-                      leading-9
-                      mb-10
+                      group
+                      relative
+                      overflow-hidden
+                      rounded-[2rem]
+                      border border-white/5
+                      bg-[#0B0B0B]
+                      p-8
+                      hover:border-[#D4AF37]/15
+                      hover:-translate-y-2
+                      transition-all duration-500
+                      touch-feedback-soft
+                      shadow-[0_4px_24px_rgba(0,0,0,0.4)]
                     "
                   >
-                    "{review.comment}"
-                  </p>
+                    {/* Quote */}
+                    <span className="review-quote-mark">&ldquo;</span>
 
-                  {/* User */}
-                  <div className="flex items-center gap-4">
-
-                    {/* Avatar */}
+                    {/* Glow */}
                     <div
                       className="
-                        w-14 h-14
-                        rounded-2xl
-                        bg-yellow-500/10
-                        border border-yellow-500/20
-                        flex items-center justify-center
-                        text-yellow-500
-                        font-black
-                        text-lg
+                        absolute top-0 right-0
+                        w-40 h-40
+                        bg-[#D4AF37]/4
+                        blur-3xl
                       "
-                    >
-                      {review.name.charAt(0)}
-                    </div>
+                    ></div>
 
-                    {/* Info */}
-                    <div>
-                      <h3
+                    {/* Top */}
+                    <div className="relative z-10 flex items-center justify-between mb-6">
+
+                      {/* Stars */}
+                      <div className="flex items-center gap-1">
+                        {[...Array(review.rating)].map((_, index) => (
+                          <Star
+                            key={index}
+                            size={16}
+                            className="fill-[#D4AF37] text-[#D4AF37]"
+                          />
+                        ))}
+                      </div>
+
+                      {/* Verified */}
+                      <div
                         className="
-                          text-white
-                          font-bold
-                          text-lg
+                          flex items-center gap-1
+                          text-emerald-400
+                          text-xs
+                          bg-emerald-500/8
+                          border border-emerald-500/15
+                          px-3 py-1
+                          rounded-full
                         "
                       >
-                        {review.name}
-                      </h3>
+                        <ShieldCheck size={12} />
+                        موثق
+                      </div>
 
-                      <p className="text-zinc-500 text-sm">
-                        عميل حقيقي
-                      </p>
                     </div>
 
-                  </div>
-                </div>
-              ))}
+                    {/* Comment */}
+                    <p
+                      className="
+                        relative z-10
+                        text-zinc-300
+                        text-base
+                        leading-8
+                        mb-8
+                        text-editorial
+                      "
+                    >
+                      &ldquo;{review.comment}&rdquo;
+                    </p>
+
+                    {/* User */}
+                    <div className="relative z-10 flex items-center gap-4">
+
+                      {/* Avatar */}
+                      <div
+                        className={`
+                          w-12 h-12
+                          rounded-xl
+                          bg-gradient-to-br ${avatarGradient}
+                          border border-white/5
+                          flex items-center justify-center
+                          text-white/80
+                          font-bold
+                          text-base
+                        `}
+                      >
+                        {review.name.charAt(0)}
+                      </div>
+
+                      {/* Info */}
+                      <div>
+                        <h3 className="text-white font-bold text-base">
+                          {review.name}
+                        </h3>
+                        <p className="text-zinc-500 text-xs mt-0.5">
+                          عميل موثق
+                        </p>
+                      </div>
+
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
 
             {/* Empty */}
@@ -369,18 +434,23 @@ export default function ReviewsPage() {
           </>
         )}
 
-        {/* Add Review */}
+        {/* Add Review Form */}
         <section
           id="add-review"
           className="mt-24 max-w-3xl mx-auto"
+          ref={formRef}
         >
 
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={formInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="
               bg-[#0B0B0B]
-              border border-zinc-800
-              rounded-[40px]
+              border border-white/5
+              rounded-[2rem]
               p-8 md:p-10
+              shadow-[0_4px_24px_rgba(0,0,0,0.4)]
             "
           >
             {/* Header */}
@@ -390,12 +460,13 @@ export default function ReviewsPage() {
                 className="
                   inline-flex
                   mb-4
-                  text-yellow-500
-                  bg-yellow-500/10
-                  border border-yellow-500/20
+                  text-[#D4AF37]
+                  bg-[#D4AF37]/10
+                  border border-[#D4AF37]/20
                   px-5 py-2
                   rounded-full
                   text-sm font-semibold
+                  label-luxury
                 "
               >
                 ADD REVIEW
@@ -417,9 +488,21 @@ export default function ReviewsPage() {
               </p>
             </div>
 
+            {/* Honeypot — invisible to users */}
+            <div className="absolute opacity-0 pointer-events-none h-0 overflow-hidden" aria-hidden="true">
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
+            </div>
+
             {/* Name */}
             <div className="mb-6">
-              <label className="text-white block mb-3">
+              <label className="text-white block mb-3 text-sm font-medium">
                 الاسم
               </label>
 
@@ -428,23 +511,25 @@ export default function ReviewsPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="اكتب اسمك"
+                maxLength={50}
                 className="
                   w-full
                   bg-black
-                  border border-zinc-800
+                  border border-white/5
                   rounded-2xl
                   px-5 py-4
                   text-white
                   outline-none
-                  focus:border-yellow-500/40
+                  focus:border-[#D4AF37]/30
                   transition-all duration-300
+                  placeholder:text-zinc-600
                 "
               />
             </div>
 
             {/* Rating */}
             <div className="mb-6">
-              <label className="text-white block mb-4">
+              <label className="text-white block mb-4 text-sm font-medium">
                 التقييم
               </label>
 
@@ -454,12 +539,13 @@ export default function ReviewsPage() {
                     key={star}
                     onClick={() => setRating(star)}
                     type="button"
+                    className="touch-feedback transition-transform duration-150"
                   >
                     <Star
                       size={28}
                       className={
                         star <= rating
-                          ? "fill-yellow-500 text-yellow-500"
+                          ? "fill-[#D4AF37] text-[#D4AF37]"
                           : "text-zinc-700"
                       }
                     />
@@ -470,7 +556,7 @@ export default function ReviewsPage() {
 
             {/* Comment */}
             <div className="mb-8">
-              <label className="text-white block mb-3">
+              <label className="text-white block mb-3 text-sm font-medium">
                 التعليق
               </label>
 
@@ -479,58 +565,46 @@ export default function ReviewsPage() {
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="اكتب رأيك هنا..."
                 rows={5}
+                maxLength={500}
                 className="
                   w-full
                   bg-black
-                  border border-zinc-800
+                  border border-white/5
                   rounded-2xl
                   px-5 py-4
                   text-white
                   outline-none
                   resize-none
-                  focus:border-yellow-500/40
+                  focus:border-[#D4AF37]/30
                   transition-all duration-300
+                  placeholder:text-zinc-600
                 "
               ></textarea>
             </div>
 
-            {/* Success */}
-            {success && (
-              <div
-                className="
-                  mb-6
-                  bg-green-500/10
-                  border border-green-500/20
-                  text-green-400
-                  rounded-2xl
-                  px-5 py-4
-                "
-              >
-                تم إرسال تقييمك بنجاح ✨
-              </div>
-            )}
-
             {/* Submit */}
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               onClick={handleSubmit}
               disabled={sending}
               className="
                 w-full
-                bg-yellow-500
-                hover:bg-yellow-400
+                bg-[#D4AF37]
+                hover:bg-[#E8D48B]
                 disabled:opacity-50
                 text-black
                 font-black
                 py-4
                 rounded-2xl
                 transition-all duration-300
-                shadow-[0_0_30px_rgba(250,204,21,0.2)]
+                shadow-[0_0_30px_rgba(212,175,55,0.15)]
+                btn-shimmer
               "
             >
               {sending ? "جاري الإرسال..." : "إرسال التقييم"}
-            </button>
+            </motion.button>
 
-          </div>
+          </motion.div>
         </section>
 
       </div>
