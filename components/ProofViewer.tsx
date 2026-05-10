@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 
 interface ProofViewerProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface ProofViewerProps {
   image: string;
   title?: string;
   layoutId?: string;
+  proofId?: string;
 }
 
 export default function ProofViewer({
@@ -18,8 +19,31 @@ export default function ProofViewer({
   image,
   title,
   layoutId,
+  proofId,
 }: ProofViewerProps) {
   const [dragY, setDragY] = useState(0);
+  const viewTracked = useRef(false);
+
+  // Track view once when viewer opens (debounced)
+  useEffect(() => {
+    if (!isOpen || !proofId || viewTracked.current) return;
+    viewTracked.current = true;
+
+    const timer = setTimeout(() => {
+      fetch("/api/admin/proofs/views", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proofId }),
+      }).catch(() => {}); // Fire and forget
+    }, 1000); // 1s debounce
+
+    return () => clearTimeout(timer);
+  }, [isOpen, proofId]);
+
+  // Reset tracking when viewer closes
+  useEffect(() => {
+    if (!isOpen) viewTracked.current = false;
+  }, [isOpen]);
 
   const handleDragEnd = useCallback(
     (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {

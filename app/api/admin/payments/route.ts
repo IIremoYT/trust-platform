@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb, adminAuth } from "@/lib/firebaseAdmin";
 import * as admin from "firebase-admin";
 import { cookies } from "next/headers";
+import { logAudit } from "@/lib/audit";
 
 async function verifyAdmin() {
   const cookieStore = await cookies();
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    logAudit("payment_created", { title, method });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Unauthorized or Internal Error" }, { status: 401 });
@@ -50,6 +52,7 @@ export async function DELETE(req: Request) {
     if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
 
     await adminDb.collection("payments").doc(id).delete();
+    logAudit("payment_deleted", { id });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Unauthorized or Internal Error" }, { status: 401 });

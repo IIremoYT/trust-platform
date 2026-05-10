@@ -44,6 +44,7 @@ export default function DashboardHome() {
     title?: string;
     createdAt?: { toDate?: () => Date };
     active?: boolean;
+    status?: "draft" | "published" | "archived";
   }
 
   // Recent Proofs
@@ -560,27 +561,20 @@ export default function DashboardHome() {
 
                               {/* Status */}
                               <td className="p-6">
-                                <span
-                                  className={`
-                                    px-3 py-1
-
-                                    rounded-full
-
-                                    text-xs
-                                    font-bold
-
-                                    border
-
-                                    ${proof.active
-                                      ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                      : "bg-red-500/10 text-red-500 border-red-500/20"
-                                    }
-                                  `}
-                                >
-                                  {proof.active
-                                    ? "منشور"
-                                    : "مخفي"}
-                                </span>
+                                {(() => {
+                                  const s = proof.status || (proof.active ? "published" : "draft");
+                                  const cfg: Record<string, { label: string; cls: string }> = {
+                                    draft: { label: "مسودة", cls: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" },
+                                    published: { label: "منشور", cls: "bg-green-500/10 text-green-500 border-green-500/20" },
+                                    archived: { label: "مؤرشف", cls: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" },
+                                  };
+                                  const c = cfg[s] || cfg.draft;
+                                  return (
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${c.cls}`}>
+                                      {c.label}
+                                    </span>
+                                  );
+                                })()}
                               </td>
 
                               {/* Actions */}

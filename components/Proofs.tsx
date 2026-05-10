@@ -22,7 +22,8 @@ interface Proof {
   id: string;
   image: string;
   title?: string;
-  active: boolean;
+  active?: boolean;
+  status?: "draft" | "published" | "archived";
 }
 
 // Animated card wrapper
@@ -201,7 +202,12 @@ export default function Proofs() {
           ...(doc.data() as Omit<Proof, "id">),
         }));
 
-        setProofs(data.filter((item) => item.active));
+        setProofs(data.filter((item) => {
+          // New status system: show only published
+          if (item.status) return item.status === "published";
+          // Legacy fallback: show if active is true
+          return item.active === true;
+        }));
       } catch (error) {
         console.error("Error fetching proofs:", error);
       } finally {

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { trustToast } from "@/components/TrustToast";
-import { Settings, Save, LayoutTemplate, Link as LinkIcon, Power, MessageSquare } from "lucide-react";
+import { Settings, Save, LayoutTemplate, Link as LinkIcon, Power, MessageSquare, Construction } from "lucide-react";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const [showAnnouncementButton, setShowAnnouncementButton] = useState(true);
   const [announcementButtonText, setAnnouncementButtonText] = useState("");
   const [announcementButtonLink, setAnnouncementButtonLink] = useState("https://wa.me/201095528015");
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "global"), (docSnap) => {
@@ -26,6 +27,7 @@ export default function SettingsPage() {
         if (data.showAnnouncementButton !== undefined) setShowAnnouncementButton(data.showAnnouncementButton);
         if (data.announcementButtonText !== undefined) setAnnouncementButtonText(data.announcementButtonText);
         if (data.announcementButtonLink !== undefined) setAnnouncementButtonLink(data.announcementButtonLink);
+        if (data.maintenanceMode !== undefined) setMaintenanceMode(data.maintenanceMode);
       }
       setLoading(false);
     });
@@ -47,6 +49,7 @@ export default function SettingsPage() {
           showAnnouncementButton,
           announcementButtonText,
           announcementButtonLink,
+          maintenanceMode,
         }),
       });
 
@@ -173,6 +176,27 @@ export default function SettingsPage() {
               />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Maintenance Mode Card */}
+      <div className="bg-[#0A0A0A]/50 backdrop-blur-sm border border-white/10 rounded-[28px] p-6 md:p-8">
+        <div className="flex items-center gap-3 text-red-400 mb-6 border-b border-white/5 pb-6">
+          <Construction size={24} />
+          <h2 className="text-2xl font-bold text-white">وضع الصيانة</h2>
+        </div>
+
+        <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5">
+          <div>
+            <h3 className="text-lg font-bold text-white">تفعيل وضع الصيانة</h3>
+            <p className="text-sm text-gray-400">عند التفعيل، سيرى الزوار صفحة "تحت الصيانة" بدلاً من المحتوى. لوحة التحكم تبقى متاحة.</p>
+          </div>
+          <button
+            onClick={() => setMaintenanceMode(!maintenanceMode)}
+            className={`w-14 h-8 rounded-full p-1 transition-colors ${maintenanceMode ? 'bg-red-500' : 'bg-gray-700'}`}
+          >
+            <div className={`w-6 h-6 bg-white rounded-full transition-transform ${maintenanceMode ? 'translate-x-0' : '-translate-x-6'}`} />
+          </button>
         </div>
       </div>
     </div>

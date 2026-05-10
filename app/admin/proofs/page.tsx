@@ -16,8 +16,9 @@ import {
   Trash2,
   Image as ImageIcon,
   Plus,
-  Check,
-  X,
+  FileEdit,
+  Globe,
+  Archive,
 } from "lucide-react";
 
 export default function AdminProofs() {
@@ -32,8 +33,22 @@ export default function AdminProofs() {
     image?: string;
     imageUrl?: string;
     active?: boolean;
+    status?: "draft" | "published" | "archived";
+    views?: number;
     createdAt?: { toDate?: () => Date };
   }
+
+  // Helper: get effective status from proof (backward compatible)
+  const getStatus = (p: Proof): "draft" | "published" | "archived" => {
+    if (p.status) return p.status;
+    return p.active ? "published" : "draft";
+  };
+
+  const statusConfig = {
+    draft: { label: "مسودة", icon: FileEdit, bg: "bg-yellow-500/10", border: "border-yellow-500/20", text: "text-yellow-400" },
+    published: { label: "منشور", icon: Globe, bg: "bg-green-500/10", border: "border-green-500/20", text: "text-green-400" },
+    archived: { label: "مؤرشف", icon: Archive, bg: "bg-zinc-500/10", border: "border-zinc-500/20", text: "text-zinc-400" },
+  };
 
   const [proofs, setProofs] = useState<Proof[]>([]);
   const [fetching, setFetching] = useState(true);
@@ -190,22 +205,20 @@ export default function AdminProofs() {
     }
   };
 
-  // Toggle Active
-  const toggleActive = async (
+  // Change Status
+  const changeStatus = async (
     id: string,
-    current: boolean
+    newStatus: "draft" | "published" | "archived"
   ) => {
     try {
       const res = await fetch("/api/admin/proofs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, active: !current }),
+        body: JSON.stringify({ id, status: newStatus }),
       });
 
       if (!res.ok) throw new Error("API Error");
-
       fetchProofs();
-
     } catch (error) {
       console.error(error);
     }
@@ -531,92 +544,42 @@ export default function AdminProofs() {
                     "
                   >
                     <div>
-                      <span
-                        className="
-                          text-white
-                          text-sm
-                          font-semibold
-
-                          block
-                          mb-2
-                        "
-                      >
+                      <span className="text-white text-sm font-semibold block mb-2">
                         {proof.title}
                       </span>
 
-                      <span
-                        className={`
-                          text-xs
-                          px-3 py-1
-                          rounded-full
-                          border
-
-                          ${
-                            proof.active
-                              ? "bg-green-500/10 border-green-500/20 text-green-400"
-                              : "bg-red-500/10 border-red-500/20 text-red-400"
-                          }
-                        `}
-                      >
-                        {proof.active
-                          ? "ظاهر"
-                          : "مخفي"}
-                      </span>
+                      {(() => {
+                        const s = getStatus(proof);
+                        const cfg = statusConfig[s];
+                        const Icon = cfg.icon;
+                        return (
+                          <span className={`inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border ${cfg.bg} ${cfg.border} ${cfg.text}`}>
+                            <Icon size={12} />
+                            {cfg.label}
+                          </span>
+                        );
+                      })()}
                     </div>
 
                     <div className="flex items-center gap-2">
-
-                      {/* Toggle */}
-                      <button
-                        onClick={() =>
-                          toggleActive(
-                            proof.id,
-                            !!proof.active
-                          )
-                        }
-                        className={`
-                          p-2
-                          rounded-xl
-                          transition-all
-
-                          ${
-                            proof.active
-                              ? "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white"
-                              : "bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white"
-                          }
-                        `}
+                      {/* Status Selector */}
+                      <select
+                        value={getStatus(proof)}
+                        onChange={(e) => changeStatus(proof.id, e.target.value as "draft" | "published" | "archived")}
+                        className="bg-white/5 border border-white/10 text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-brand-gold/50 cursor-pointer"
                       >
-                        {proof.active ? (
-                          <X size={18} />
-                        ) : (
-                          <Check size={18} />
-                        )}
-                      </button>
+                        <option value="draft" className="bg-black">مسودة</option>
+                        <option value="published" className="bg-black">منشور</option>
+                        <option value="archived" className="bg-black">مؤرشف</option>
+                      </select>
 
                       {/* Delete */}
                       <button
-                        onClick={() =>
-                          handleDelete(
-                            proof.id
-                          )
-                        }
-                        className="
-                          p-2
-
-                          bg-red-500/10
-                          text-red-500
-
-                          hover:bg-red-500
-                          hover:text-white
-
-                          rounded-xl
-
-                          transition-all
-                        "
+                        onClick={() => handleDelete(proof.id)}
+                        className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
                       >
                         <Trash2 size={18} />
                       </button>
-
                     </div>
 
                   </div>

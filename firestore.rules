@@ -39,6 +39,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // --- Audit Log (Admin-only, server-written) ---
+    match /audit/{doc} {
+      allow read: if false;
+      allow write: if false;
+    }
+
     // Default block
     match /{document=**} {
       allow read, write: if false;

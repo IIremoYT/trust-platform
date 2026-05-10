@@ -26,6 +26,7 @@ import {
   Menu,
   X,
   Settings,
+  Clock,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -105,6 +106,13 @@ export default function AdminLayout({
         <Settings size={20} />
       ),
       href: "/admin/settings",
+    },
+    {
+      name: "سجل النشاط",
+      icon: (
+        <Clock size={20} />
+      ),
+      href: "/admin/audit",
     },
   ];
 
