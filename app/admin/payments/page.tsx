@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 
 import {
   collection,
-  addDoc,
   getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
@@ -109,15 +105,13 @@ export default function AdminPayments() {
       setLoading(true);
 
       try {
-        await addDoc(
-          collection(db, "payments"),
-          {
-            name,
-            image,
-            value,
-            active: true,
-          }
-        );
+        const apiRes = await fetch("/api/admin/payments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, image, value }),
+        });
+
+        if (!apiRes.ok) throw new Error("API Error");
 
         // Reset
         setName("");
@@ -156,13 +150,13 @@ export default function AdminPayments() {
         return;
 
       try {
-        await deleteDoc(
-          doc(
-            db,
-            "payments",
-            id
-          )
-        );
+        const res = await fetch("/api/admin/payments", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+
+        if (!res.ok) throw new Error("API Error");
 
         setPayments(
           payments.filter(
@@ -190,16 +184,13 @@ export default function AdminPayments() {
       current: boolean
     ) => {
       try {
-        await updateDoc(
-          doc(
-            db,
-            "payments",
-            id
-          ),
-          {
-            active: !current,
-          }
-        );
+        const res = await fetch("/api/admin/payments", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, active: !current }),
+        });
+
+        if (!res.ok) throw new Error("API Error");
 
         fetchPayments();
 

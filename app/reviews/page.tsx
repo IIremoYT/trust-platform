@@ -17,6 +17,12 @@ import { motion, useInView } from "framer-motion";
 import { db } from "@/lib/firebase";
 import { trustToast } from "@/components/TrustToast";
 
+declare global {
+  interface Window {
+    grecaptcha: any;
+  }
+}
+
 interface Review {
   id: string;
   name: string;
@@ -122,13 +128,21 @@ export default function ReviewsPage() {
 
     try {
       setSending(true);
-
       loadingId = trustToast.loading("جاري إرسال تقييمك...");
+
+      // Generate reCAPTCHA token
+      const token = await new Promise<string>((resolve, reject) => {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'submit_review' })
+            .then(resolve)
+            .catch(reject);
+        });
+      });
 
       const response = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, comment, rating, honeypot }),
+        body: JSON.stringify({ name, comment, rating, honeypot, token }),
       });
 
       if (!response.ok) {

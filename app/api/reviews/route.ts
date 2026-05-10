@@ -35,12 +35,31 @@ export async function POST(req: Request) {
     if (rateLimitMap.size > 1000) rateLimitMap.clear();
 
     const body = await req.json();
-    const { name, comment, rating, honeypot } = body;
+    const { name, comment, rating, honeypot, token } = body;
 
     // Honeypot check
     if (honeypot) {
       // Act like it succeeded to fool bots
       return NextResponse.json({ success: true, fake: true });
+    }
+
+    if (!token) {
+      return NextResponse.json({ error: "Missing reCAPTCHA token" }, { status: 400 });
+    }
+
+    // Verify reCAPTCHA token
+    const verifyRes = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
+    });
+
+    const verifyData = await verifyRes.json();
+    
+    // Score < 0.5 is considered a bot
+    if (!verifyData.success || verifyData.score < 0.5) {
+      console.warn("Bot detected by reCAPTCHA:", verifyData);
+      return NextResponse.json({ error: "Bot detected. Request blocked." }, { status: 403 });
     }
 
     if (!name || !comment || typeof rating !== "number") {

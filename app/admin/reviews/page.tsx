@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { 
   collection, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc 
+  getDocs,
 } from "firebase/firestore";
 import { Check, Trash2, Star, X, Eye, EyeOff } from "lucide-react";
 import { db } from "@/lib/firebase";
@@ -46,16 +43,18 @@ export default function AdminReviewsPage() {
   // دمجنا الـ Toggle logic عشان نحدث الـ State فوراً (Optimistic UI)
   const toggleReview = async (id: string, currentStatus: boolean) => {
     try {
-      // تحديث في الـ UI أولاً لسرعة الاستجابة
       setReviews(prev => prev.map(r => r.id === id ? { ...r, active: !currentStatus } : r));
       
-      // التحديث في Firebase
-      await updateDoc(doc(db, "reviews", id), {
-        active: !currentStatus,
+      const res = await fetch("/api/admin/reviews", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, active: !currentStatus }),
       });
+
+      if (!res.ok) throw new Error("API Error");
     } catch (error) {
       console.error("Error updating status:", error);
-      fetchReviews(); // لو حصل فشل نرجع الداتا الأصلية
+      fetchReviews(); 
     }
   };
 
@@ -63,10 +62,15 @@ export default function AdminReviewsPage() {
     if (!confirm("هل تريد حذف هذا التقييم نهائياً؟")) return;
 
     try {
-      // تحديث الـ UI فوراً
       setReviews(prev => prev.filter(r => r.id !== id));
-      // الحذف من Firebase
-      await deleteDoc(doc(db, "reviews", id));
+      
+      const res = await fetch("/api/admin/reviews", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!res.ok) throw new Error("API Error");
     } catch (error) {
       console.error("Error deleting review:", error);
       fetchReviews();

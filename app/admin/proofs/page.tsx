@@ -6,14 +6,9 @@ import { db } from "@/lib/firebase";
 
 import {
   collection,
-  addDoc,
   getDocs,
-  deleteDoc,
-  doc,
-  serverTimestamp,
   query,
   orderBy,
-  updateDoc,
 } from "firebase/firestore";
 
 import {
@@ -117,17 +112,14 @@ export default function AdminProofs() {
           );
         }
 
-        // Save to Firestore
-        await addDoc(
-          collection(db, "proofs"),
-          {
-            title,
-            image: uploadData.url,
-            active: false,
-            createdAt:
-              serverTimestamp(),
-          }
-        );
+        // Save to Firestore via Secure API
+        const apiRes = await fetch("/api/admin/proofs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, image: uploadData.url }),
+        });
+
+        if (!apiRes.ok) throw new Error("API Error");
 
         // Reset
         setTitle("");
@@ -166,9 +158,13 @@ export default function AdminProofs() {
       return;
 
     try {
-      await deleteDoc(
-        doc(db, "proofs", id)
-      );
+      const res = await fetch("/api/admin/proofs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!res.ok) throw new Error("API Error");
 
       setProofs(
         proofs.filter(
@@ -189,12 +185,13 @@ export default function AdminProofs() {
     current: boolean
   ) => {
     try {
-      await updateDoc(
-        doc(db, "proofs", id),
-        {
-          active: !current,
-        }
-      );
+      const res = await fetch("/api/admin/proofs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, active: !current }),
+      });
+
+      if (!res.ok) throw new Error("API Error");
 
       fetchProofs();
 
